@@ -31,13 +31,7 @@
 
 //////////////////////////////////////////////////////////////////
 // 		full-Second Delay
-#define ms_to_250ms				250
-#define delay_250ms_1MHZ		delay_1ms_1MHZ*ms_to_250ms
-#define delay_250ms_8MHZ		delay_1ms_8MHZ*ms_to_250ms
-#define delay_250ms_12MHZ		delay_1ms_12MHZ*ms_to_250ms
-#define delay_250ms_16MHZ		delay_1ms_16MHZ*ms_to_250ms
-
-//#define delay_1000_ms			1000
+#define delay_1000_ms			1000
 
 
 //////////////////////////////////////////////////////////////////
@@ -55,7 +49,7 @@ void _time_delay_us( int us_delay)
 
 	//////////////////////////////////////////////////////////////
 	// Delays the amount of us passed by caller
-	for( i = 0; i< us_delay; i++)
+	for( i = us_delay; i>0; i--)
 	{
 		if(BCSCTL1 == CALBC1_1MHZ)
 		{
@@ -89,7 +83,7 @@ void _time_delay_ms( int ms_delay)
 
 	//////////////////////////////////////////////////////////////
 	// Delays the amount of ms passed by caller
-	for( i = 0; i< ms_delay; i++)
+	for( i = ms_delay; i> 0; i--)
 	{
 		if(BCSCTL1 == CALBC1_1MHZ)
 		{
@@ -127,28 +121,10 @@ void _time_delay_s( int s_delay )
 
 	//////////////////////////////////////////////////////////////
 	// Calls the ms time delay function
-	for( i = 0; i<s_delay; i++)
+	for( i = s_delay; i>0; i--)
 	{
-		if(BCSCTL1 == CALBC1_1MHZ)
-		{
-			_delay_cycles(delay_250ms_1MHZ);
-		}
-
-		if(BCSCTL1 == CALBC1_8MHZ )
-		{
-			_delay_cycles( delay_250ms_8MHZ );
-		}
-
-		if(BCSCTL1 == CALBC1_12MHZ)
-		{
-			_delay_cycles( delay_250ms_12MHZ );
-		}
-
-		if(BCSCTL1 == CALBC1_16MHZ)
-		{
-			_delay_cycles( delay_250ms_16MHZ );
-		}
-
+		_time_delay_ms(delay_1000_ms);
 	}
 }
+
 #endif /* MSP430_LIB_TIME_DELAY_H_ */
