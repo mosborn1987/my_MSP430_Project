@@ -5,8 +5,8 @@
 void main()
 {
 	WDTCTL = WDTPW | WDTHOLD;		// Stop watchdog timer
-	BCSCTL1 = CALBC1_16MHZ;
-//	DCOCTL = CALDCO_16MHZ;
+	BCSCTL1 = CALBC1_12MHZ;
+	DCOCTL = CALDCO_12MHZ;
 	P1OUT = 0x00;
 	P1DIR |= 0x01;					// Set P1.0 to output direction
 
@@ -14,7 +14,8 @@ void main()
 	while(1)
 	{
 		P1OUT ^= 0x01;
-		_time_delay_s(1);
+//		_time_delay_ms(1000);
+		_time_delay_s(4);
 //		_delay_cycles(100000);
 	}
 
