@@ -124,8 +124,6 @@ void _time_delay_s( int s_delay )
 	{
 		_time_delay_ms(delay_1000_ms);
 	}
-//	TACTL |= TASSEL_1;
-//	ConfigTimerA(1000);
 }
 
 #endif /* MSP430_LIB_TIME_DELAY_H_ */
