@@ -72,17 +72,90 @@ void _time_delay_us( int us_delay)
 	}
 }
 
+void _LP_time_delay_us( int us_delay )
+{
+	CCTL0 = CCIE;                             // CCR0 interrupt enabled
+
+	// Set us time delay
+	CCR0 = us_delay;
+
+	// TaSSEL_2 is SMCLK which is sourced by the DCO
+	TACTL = TASSEL_2 + MC_1 + ID_0;           // SMCLK/8, upmode
+
+	// Calibrate the DCO Clock
+	DCOCTL = CALDCO_1MHZ;
+	//  unsigned int CALDCO_1MHZ;
+
+	// LPM0 is the same as CPUOFF
+	_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
+
+	return;
+
+}
+
+
+void _LP_time_delay_ms( int ms_delay)
+{
+	int i = 0;
+	for( i = ms_delay; i>0; i-- )
+	{
+		CCTL0 = CCIE;                             // CCR0 interrupt enabled
+
+		// Set us time delay
+		CCR0 = ms_delay;
+
+		// TaSSEL_2 is SMCLK which is sourced by the DCO
+		TACTL = TASSEL_2 + MC_1 + ID_0;           // SMCLK/8, upmode
+
+		// Calibrate the DCO Clock
+		DCOCTL = CALDCO_1MHZ;
+
+		// Delay 1000 us
+
+		// LPM0 is the same as CPUOFF
+		_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
+
+	}
+
+
+	return;
+}
+
+void _LP_time_delay_s( int s_delay)
+{
+	int i = 0;
+	for(i = s_delay; i>1; i--)
+	{
+
+	}
+}
+
+// Timer A0 interrupt service routine
+#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
+__interrupt void Timer_A (void)
+{
+   P1OUT ^= BIT0;                          // Toggle P1.0
+   TACTL &= ~TAIFG;
+   CCTL0 &= ~CCTL0;
+   _BIC_SR(LPM0_EXIT);
+//   _BIS_SR_IRQ();
+   _DINT();
+}
+
+
+
+
 //////////////////////////////////////////////////////////////////
 // milli-Second Delay
-void _time_delay_ms( int ms_delay)
+void _time_delay_ms( unsigned int ms_delay)
 {
 	//////////////////////////////////////////////////////////////
 	// Initiate counter
-	int i = 0;
+	unsigned int i = 0;
 
 	//////////////////////////////////////////////////////////////
 	// Delays the amount of ms passed by caller
-	for( i = ms_delay; i> 0; i--)
+	for( i = ms_delay; i>1; i--)
 	{
 		if(BCSCTL1 == CALBC1_1MHZ)
 		{
@@ -143,8 +216,8 @@ void _time_delay_s( int s_delay )
 //	BCSCTL1 = CALBC1_1MHZ;
 //	CCTL0 = CCIE;                             // CCR0 interrupt enabled
 //	TACTL = TASSEL_1 + MC_1 + ID_3;           // ACLK/8, upmode
-//	//  CCR0 =  10000;                     		// 12.5 Hz
 //
+//	// Enable
 //	_EINT();
 //
 //	// Once placed in LPM3 the CPU will not continue executing other commands until
