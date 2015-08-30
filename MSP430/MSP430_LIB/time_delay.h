@@ -120,14 +120,35 @@ void _LP_time_delay_ms( int ms_delay)
 
 	return;
 }
-
+#define ms50_per_s  10
+#define us_per_50ms 50000*0.35
+#define ms_per_s 1000
+//#define
 void _LP_time_delay_s( int s_delay)
 {
-	int i = 0;
-	for(i = s_delay; i>1; i--)
-	{
+	int calibration = s_delay*ms50_per_s;
+	int j = 0;
 
+	// Delay 50 ms
+	for( j = calibration; j>=1; j--)
+	{
+		CCTL0 = CCIE;                             // CCR0 interrupt enabled
+
+		// Set us time delay
+		CCR0 = us_per_50ms;
+
+		// TaSSEL_2 is SMCLK which is sourced by the DCO
+		TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+
+		// Calibrate the DCO Clock
+		DCOCTL = CALDCO_1MHZ;
+
+		// Delay 1000 us
+
+		// LPM0 is the same as CPUOFF
+		_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
 	}
+
 }
 
 // Timer A0 interrupt service routine
