@@ -79,9 +79,6 @@
 #define INPUT					false
 
 
-
-
-
 /************************************************************
 * pinMODE - This function will set the I/O State of a given
 * 			GPIO.
@@ -173,6 +170,35 @@ void digitalWrite( int GPIO, int Logic_Value)
 * END - digitalWrite
 ************************************************************/
 
+
+/************************************************************
+* Toggle_GPIO - This function will set the output state of
+* 				 a given GPIO pin.
+************************************************************/
+void Toggle_GPIO( int GPIO )
+{
+	//*******************************************************
+	// Toggle PORT_1 PIN Logic Value
+	//*******************************************************
+	if( (GPIO & PORT_MASK) == PORT_1 )
+	{
+		P1OUT ^= (GPIO & GPIO_MASK);
+	}
+
+	//*******************************************************
+	// Toggle PORT_2 PIN Logic Value
+	//*******************************************************
+	if((GPIO & PORT_MASK) == PORT_2)
+	{
+		P1OUT ^= (GPIO & GPIO_MASK);
+	}
+
+	// Add ports as needed
+
+}
+/************************************************************
+* END - digitalWrite
+************************************************************/
 
 
 

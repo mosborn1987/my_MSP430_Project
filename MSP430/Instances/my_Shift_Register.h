@@ -54,10 +54,10 @@ void Spin_infinitly( void )
 
 		for(j = 0; j<6; j++ )
 		{
-			Set_Shift_Register(send_byte);//8, send_byte, SCLK_PIN, SDA_PIN);
+			Set_Shift_Register(send_byte);
 			_time_delay_ms(25);
 
-			Set_Shift_Register(send_byte);//8, 0x00, SCLK_PIN, SDA_PIN);
+			Set_Shift_Register(send_byte);
 			_time_delay_ms(75);
 
 			send_byte = (send_byte << 1);

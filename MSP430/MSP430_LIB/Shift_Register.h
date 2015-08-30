@@ -27,17 +27,16 @@ void set_ShiftRegister( int register_bits, int value_to_Send, int m_SCLK_PIN, in
 		digitalWrite( m_SCLK_PIN, LOW );
 		//_time_delay_us( us_delay_value);
 
-		// set Data Line HIGH
 		if((value_to_Send&(1<<(i-1))))
 		{
-			// Set Data HIGH
+			// Send a 0 - Logic HIGH
 			digitalWrite(m_SDA_PIN, HIGH);
 
 		}
 
 		else
 		{
-			// set Data Line HIGH
+			// Send a 0 - Logic LOW
 			digitalWrite(m_SDA_PIN, LOW);
 		}
 
@@ -46,6 +45,5 @@ void set_ShiftRegister( int register_bits, int value_to_Send, int m_SCLK_PIN, in
 		// _time_delay_us( us_delay_value);
 	}
 }
-
 
 #endif /* LIBRARY_SHIFT_REGISTER_H_ */

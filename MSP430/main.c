@@ -2,33 +2,172 @@
 #include <time_delay.h>
 #include <GPIOs.h>
 #include <my_Shift_Register.h>
+#include <MSP430_Clock.h>
 
-#define SCLK_PIN		P1_0
-#define SDA_PIN		    P1_1
+void main(void)
+{
+  WDTCTL = WDTPW + WDTHOLD;     // Stop WDT
+
+  P1DIR |= BIT0 + BIT6;            // P1.0 and P1.6 pins output the rest are input
+
+  // P1.3
+  P1REN |= BIT3;                   // Enable internal pull-up/down resistors
+  P1OUT |= BIT3;                   //Select pull-up mode for P1.3
+  P1IE |= BIT3;                    // P1.3 interrupt enabled
+  P1IES |= BIT3;                   // P1.3 Hi/lo edge
+  P1IFG &= ~BIT3;                  // P1.3 IFG cleared
+
+  CCTL0 = CCIE;                             // CCR0 interrupt enabled
+  TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+  CCR0 =  10000;                     		// 12.5 Hz
+
+  _BIS_SR(GIE);//CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
+  while(1)                         //Loop forever, we work with interrupts!
+  {}
+}
+
+// Timer A0 interrupt service routine
+#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
+__interrupt void Timer_A (void)
+{
+   P1OUT ^= BIT0;                          // Toggle P1.0
+   TACTL &= ~TAIFG;
+}
+
+// Port 1 interrupt service routine
+#pragma vector=PORT1_VECTOR
+__interrupt void Port_1(void)
+{
+   P1OUT ^= BIT6;                      // Toggle P1.6
+   P1IFG &= ~BIT3;                     // P1.3 IFG cleared
+
+}
+
+
+//#pragma vector=TIMERA0_VECTOR
+//__interrupt void Timer_A (void)
+//{
+//   P1OUT ^= BIT0;                          // Toggle P1.0
+//}
+
+//void main(void)
+//{
+//  WDTCTL = WDTPW + WDTHOLD;     // Stop WDT
+//  CCTL0 = CCIE;                             // CCR0 interrupt enabled
+//  TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+//  CCR0 =  10000;                     // 12.5 Hz
+//  P1OUT &= 0x00;               // Shut down everything
+//  P1DIR &= 0x00;
+//  P1DIR |= BIT0 + BIT6;            // P1.0 and P1.6 pins output the rest are input
+//  P1REN |= BIT3;                   // Enable internal pull-up/down resistors
+//  P1OUT |= BIT3;                   //Select pull-up mode for P1.3
+//  P1IE |= BIT3;                       // P1.3 interrupt enabled
+//  P1IES |= BIT3;                     // P1.3 Hi/lo edge
+//  P1IFG &= ~BIT3;                  // P1.3 IFG cleared
+//  _BIS_SR(CPUOFF + GIE);          // Enter LPM0 w/ interrupt
+//  while(1)                          //Loop forever, we work with interrupts!
+//  {}
+//}
+//
+//// Timer A0 interrupt service routine
+//#pragma vector=TIMERA0_VECTOR
+//__interrupt void Timer_A (void)
+//{
+//   P1OUT ^= BIT0;                          // Toggle P1.0
+//}
+//// Port 1 interrupt service routine
+//#pragma vector=PORT1_VECTOR
+//__interrupt void Port_1(void)
+//{
+//   P1OUT ^= BIT6;                      // Toggle P1.6
+//   P1IFG &= ~BIT3;                     // P1.3 IFG cleared
+//}
+
+
+
+
 
 // Initiate watchdog timer and the clock
-void init_1MHZ_Clock();
 
 // This function is used to test new libraries
-void main()
-{
-	init_1MHZ_Clock();
+//void main()
+//{
+//	init_1MHZ_Clock();
+//
+//	// Test Area
+//	pinMODE(P1_0, OUTPUT);
+//
+//	// initiate the counter
+//
+////	// Enable interrupt
+////	CCTL0 = CCIE;
+////
+////	// ?
+////	CCR0 = 50-1;
+////
+////	// ACLK, Count UP Mode
+////	TACTL = TASSEL_1 + MC_1;
+//
+//	  CCTL0 = CCIE;                             // CCR0 interrupt enabled
+//	  TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+//	  CCR0 =  10000;                           // 12.5 Hz
+//
+////	 _BIS_SR(CPUOFF + GIE);        // Enter LPM0 w/ interrupt
+////	  while(1)                      //Loop forever, we do  everything with interrupts!
+////	  {}
+//
+//	// Enable Low Power Mode 0 and enable Global Interrupt
+//	while(1)
+//	{
+//		_BIS_SR(LPM0_bits + GIE);
+//	}
+//
+//}
+//
+//
+//// Timer A0 interrupt service routine
+//#pragma vector=TIMERA0_VECTOR
+//__interrupt void Timer_A (void)
+//{
+//
+//  P1OUT ^= BIT0;                            // Toggle P1.0
+//}
 
-	// Test the CC2530EMK
 
 
-}
 
-void init_1MHZ_Clock()
-{
-	// Stop Watch Dog Timer
-	WDTCTL = WDTPW | WDTHOLD;		// Stop watchdog timer
+//#pragma vector=TIMMERA0_VECTOR
+//__interrupt void Port_1(void)
+//{
+//	Toggle_GPIO(P1_0);
+////	P1OUT ^= 0x01; // P1.0 = toggle
+//	P1IFG &= ~0x10; // P1.4 IFG cleared
+//
+//}
 
-	// Set Clock
-	BCSCTL1 = CALBC1_1MHZ;
-	DCOCTL = CALDCO_1MHZ;
+//Timer_A TACCR0 interrupt Vector Handler
+//interrupt(TIMMERA0_VECTOR)TimerA_procedure( void )
+//{
+//	// Toggle LED1
+//	Toggle_GPIO(P1_0);
+//
+//}
 
-}
+//interrupt(TIMERA0_VECTOR)TimerA0_procedure(void){
+//	// Toggle LED1
+//	Toggle_GPIO(P1_0);
+//
+//}
+
+
+//static void
+//__attribute__((__interrupt__(TIMER0_A0_VECTOR)))
+//isr_cc0_TA0 (void)
+//{
+//	Toggle_GPIO(P1_0);
+//}
+
+
 
 
 // Scratch
