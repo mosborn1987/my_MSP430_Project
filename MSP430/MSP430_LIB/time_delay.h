@@ -126,4 +126,57 @@ void _time_delay_s( int s_delay )
 	}
 }
 
+
+
+
+////////////////////////////////////////////////////////////////////
+//// Constant
+//#define cc_per_ms 1
+//#define calibration_ratio 0.7489585648148
+//
+//void timer( unsigned int time_delay_ms)//unsigned int time_delay_ms )
+//{
+//	unsigned int clock_Cycles = time_delay_ms*calibration_ratio;
+//	CCR0 = clock_Cycles;
+//
+//	// Set up clock and counter
+//	BCSCTL1 = CALBC1_1MHZ;
+//	CCTL0 = CCIE;                             // CCR0 interrupt enabled
+//	TACTL = TASSEL_1 + MC_1 + ID_3;           // ACLK/8, upmode
+//	//  CCR0 =  10000;                     		// 12.5 Hz
+//
+//	_EINT();
+//
+//	// Once placed in LPM3 the CPU will not continue executing other commands until
+//	// the LPM is exited. In this case the ISR exits the low Power mode.
+//	LPM3;
+//
+//
+//	//	  _BIS_SR(GIE+LPM3_bits);//+LPM3_bits);//CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
+//	//	  while(1)                         //Loop forever, we work with interrupts!
+//	//	  {}
+//	return;
+//}
+//
+//
+//
+//// Timer A0 interrupt service routine
+//#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
+//__interrupt void Timer_A (void)
+//{
+//	// turn on led
+////	Toggle_GPIO(P1_0);
+//
+////   _delay_cycles(500);
+////   P1OUT ^= BIT0;
+//   TACTL &= ~TAIFG;
+//
+//   // Disable the intrrupt
+//   CCTL0 &= ~CCIE;
+//   LPM3_EXIT;
+//   _DINT();
+//   return;
+//
+//}
+
 #endif /* MSP430_LIB_TIME_DELAY_H_ */
