@@ -120,42 +120,87 @@ void _LP_time_delay_ms( int ms_delay)
 
 	return;
 }
-#define ms50_per_s  10
-#define us_per_50ms 50000*0.35
-#define ms_per_s 1000
-//#define
+
+
+#define cal 0.876680493268786//0.8772421079345962//0.8761188786029759//0.874997087463//0.86788525
+
 void _LP_time_delay_s( int s_delay)
 {
-	int calibration = s_delay*ms50_per_s;
-	int j = 0;
+	// initialize count down of seconds
+	unsigned int s_remaining = s_delay;
 
-	// Delay 50 ms
-	for( j = calibration; j>=1; j--)
+	// TaSSEL_2 is SMCLK which is sourced by the DCO
+	TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+
+	// Calibrate the DCO Clock
+	DCOCTL = CALDCO_1MHZ;
+
+	// Delay 1 second
+	while(s_remaining >= 1)
 	{
-		CCTL0 = CCIE;                             // CCR0 interrupt enabled
-
 		// Set us time delay
-		CCR0 = us_per_50ms;
 
-		// TaSSEL_2 is SMCLK which is sourced by the DCO
-		TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+		CCR0 = 50000*cal;
 
-		// Calibrate the DCO Clock
-		DCOCTL = CALDCO_1MHZ;
+		int j = 0;
 
-		// Delay 1000 us
+		for(j =4 ; j>=1; j--)
+		{
+			CCTL0 = CCIE;	// Enable interrupt
+			_BIS_SR(GIE + CPUOFF);// + GIE);
 
-		// LPM0 is the same as CPUOFF
-		_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
+		}
+		s_remaining -= 1;
+	}
+
+
+}
+
+#define one_minute_delay 60
+void _LP_time_delay_m( int m_delay)
+{
+	unsigned int m_remaining = m_delay;
+
+	// Delay 1 minute or 60 seconds
+	while( m_delay >= 1)
+	{
+		_LP_time_delay_s(one_minute_delay);
+		m_delay -= 1;
 	}
 
 }
+
+
+
+//while(s_remaining >= 3)
+//{
+//	// Delay 150 ms
+//	for( j = ms150_per_3s; j>=1; j--)
+//	{
+//		CCTL0 = CCIE;                             // CCR0 interrupt enabled
+//
+//		// Set us time delay
+//		CCR0 = us_per_50ms;
+//
+//		// TaSSEL_2 is SMCLK which is sourced by the DCO
+//		TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+//
+//		// Calibrate the DCO Clock
+//		DCOCTL = CALDCO_1MHZ;
+//
+//		// Delay 1000 us
+//
+//		// LPM0 is the same as CPUOFF
+//		_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
+//	}
+//	s_remaining -= 3; // tri decrement
+//}
 
 // Timer A0 interrupt service routine
 #pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
 __interrupt void Timer_A (void)
 {
-   P1OUT ^= BIT0;                          // Toggle P1.0
+//   P1OUT ^= BIT0;                          // Toggle P1.0
    TACTL &= ~TAIFG;
    CCTL0 &= ~CCTL0;
    _BIC_SR(LPM0_EXIT);

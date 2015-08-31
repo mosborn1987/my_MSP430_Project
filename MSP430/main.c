@@ -4,35 +4,60 @@
 #include <my_Shift_Register.h>
 #include <MSP430_Clock.h>
 
+void timer_ms(unsigned int);
+
 void main(void)
 {
   WDTCTL = WDTPW + WDTHOLD;     // Stop WDT
 
+  digitalWrite(P1_6, LOW);
+  digitalWrite(P1_0, LOW);
   P1DIR |= BIT0 + BIT6;            // P1.0 and P1.6 pins output the rest are input
 
   // P1.3
-  P1REN |= BIT3;                   // Enable internal pull-up/down resistors
-  P1OUT |= BIT3;                   //Select pull-up mode for P1.3
-  P1IE |= BIT3;                    // P1.3 interrupt enabled
-  P1IES |= BIT3;                   // P1.3 Hi/lo edge
-  P1IFG &= ~BIT3;                  // P1.3 IFG cleared
 
-  CCTL0 = CCIE;                             // CCR0 interrupt enabled
-  TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
-  CCR0 =  10000;                     		// 12.5 Hz
-
-  _BIS_SR(GIE);//CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
+//  CCTL0 = CCIE;                             // CCR0 interrupt enabled
+//
+//
+//  // TaSSEL_2 is SMCLK which is sourced by the DCO
+//  TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
+//
+//  // Calibrate the DCO Clock
+//  DCOCTL = CALDCO_1MHZ;
+////  unsigned int CALDCO_1MHZ;
+//
+//  CCR0 =  65000;                     		// 12.5 Hz
+//
+//  _BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
   while(1)                         //Loop forever, we work with interrupts!
-  {}
+  {
+	  unsigned int i = 0;
+
+//	  // 1000 ms
+//	  for(i = 0; i <1000; i++)
+//	  {
+//		  _LP_time_delay_us(1000);
+//	  }
+
+//	  _LP_time_delay_ms(1000);
+	  _LP_time_delay_m(1);
+//	  _LP_time_delay_s(1);
+	  Toggle_GPIO(P1_6);
+  }
 }
 
-// Timer A0 interrupt service routine
-#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
-__interrupt void Timer_A (void)
-{
-   P1OUT ^= BIT0;                          // Toggle P1.0
-   TACTL &= ~TAIFG;
-}
+//void timer_ms(unsigned int ms_delay)
+//{
+//
+//}
+
+//// Timer A0 interrupt service routine
+//#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
+//__interrupt void Timer_A (void)
+//{
+//   P1OUT ^= BIT0;                          // Toggle P1.0
+//   TACTL &= ~TAIFG;
+//}
 
 // Port 1 interrupt service routine
 #pragma vector=PORT1_VECTOR
