@@ -34,7 +34,12 @@
 #define delay_1000_ms			1000
 
 //////////////////////////////////////////////////////////////////
-// Time Delay Functions
+// Time Delay Functions: _time_delay_ns functions can be used
+// for short term delays. However they will use roughly 5 times
+// the amount of energy as the _LPM_time_delay_ns at 1MHZ.
+// Another Downfall is that it relies on the user to set up the
+// clock. This can result in a higher then 5 times the energy
+// consumption as the _LPM_time_delay_ns functions.
 
 //////////////////////////////////////////////////////////////////
 // Micro-Second Delay - The function checks the current
@@ -71,145 +76,6 @@ void _time_delay_us( int us_delay)
 		}
 	}
 }
-
-void _LP_time_delay_us( int us_delay )
-{
-	CCTL0 = CCIE;                             // CCR0 interrupt enabled
-
-	// Set us time delay
-	CCR0 = us_delay;
-
-	// TaSSEL_2 is SMCLK which is sourced by the DCO
-	TACTL = TASSEL_2 + MC_1 + ID_0;           // SMCLK/8, upmode
-
-	// Calibrate the DCO Clock
-	DCOCTL = CALDCO_1MHZ;
-	//  unsigned int CALDCO_1MHZ;
-
-	// LPM0 is the same as CPUOFF
-	_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
-
-	return;
-
-}
-
-
-void _LP_time_delay_ms( int ms_delay)
-{
-	int i = 0;
-	for( i = ms_delay; i>0; i-- )
-	{
-		CCTL0 = CCIE;                             // CCR0 interrupt enabled
-
-		// Set us time delay
-		CCR0 = ms_delay;
-
-		// TaSSEL_2 is SMCLK which is sourced by the DCO
-		TACTL = TASSEL_2 + MC_1 + ID_0;           // SMCLK/8, upmode
-
-		// Calibrate the DCO Clock
-		DCOCTL = CALDCO_1MHZ;
-
-		// Delay 1000 us
-
-		// LPM0 is the same as CPUOFF
-		_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
-
-	}
-
-
-	return;
-}
-
-
-#define cal 0.876680493268786//0.8772421079345962//0.8761188786029759//0.874997087463//0.86788525
-
-void _LP_time_delay_s( int s_delay)
-{
-	// initialize count down of seconds
-	unsigned int s_remaining = s_delay;
-
-	// TaSSEL_2 is SMCLK which is sourced by the DCO
-	TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
-
-	// Calibrate the DCO Clock
-	DCOCTL = CALDCO_1MHZ;
-
-	// Delay 1 second
-	while(s_remaining >= 1)
-	{
-		// Set us time delay
-
-		CCR0 = 50000*cal;
-
-		int j = 0;
-
-		for(j =4 ; j>=1; j--)
-		{
-			CCTL0 = CCIE;	// Enable interrupt
-			_BIS_SR(GIE + CPUOFF);// + GIE);
-
-		}
-		s_remaining -= 1;
-	}
-
-
-}
-
-#define one_minute_delay 60
-void _LP_time_delay_m( int m_delay)
-{
-	unsigned int m_remaining = m_delay;
-
-	// Delay 1 minute or 60 seconds
-	while( m_delay >= 1)
-	{
-		_LP_time_delay_s(one_minute_delay);
-		m_delay -= 1;
-	}
-
-}
-
-
-
-//while(s_remaining >= 3)
-//{
-//	// Delay 150 ms
-//	for( j = ms150_per_3s; j>=1; j--)
-//	{
-//		CCTL0 = CCIE;                             // CCR0 interrupt enabled
-//
-//		// Set us time delay
-//		CCR0 = us_per_50ms;
-//
-//		// TaSSEL_2 is SMCLK which is sourced by the DCO
-//		TACTL = TASSEL_2 + MC_1 + ID_3;           // SMCLK/8, upmode
-//
-//		// Calibrate the DCO Clock
-//		DCOCTL = CALDCO_1MHZ;
-//
-//		// Delay 1000 us
-//
-//		// LPM0 is the same as CPUOFF
-//		_BIS_SR(GIE + CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
-//	}
-//	s_remaining -= 3; // tri decrement
-//}
-
-// Timer A0 interrupt service routine
-#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
-__interrupt void Timer_A (void)
-{
-//   P1OUT ^= BIT0;                          // Toggle P1.0
-   TACTL &= ~TAIFG;
-   CCTL0 &= ~CCTL0;
-   _BIC_SR(LPM0_EXIT);
-//   _BIS_SR_IRQ();
-   _DINT();
-}
-
-
-
 
 //////////////////////////////////////////////////////////////////
 // milli-Second Delay
@@ -264,58 +130,5 @@ void _time_delay_s( int s_delay )
 		_time_delay_ms(delay_1000_ms);
 	}
 }
-
-
-
-
-////////////////////////////////////////////////////////////////////
-//// Constant
-//#define cc_per_ms 1
-//#define calibration_ratio 0.7489585648148
-//
-//void timer( unsigned int time_delay_ms)//unsigned int time_delay_ms )
-//{
-//	unsigned int clock_Cycles = time_delay_ms*calibration_ratio;
-//	CCR0 = clock_Cycles;
-//
-//	// Set up clock and counter
-//	BCSCTL1 = CALBC1_1MHZ;
-//	CCTL0 = CCIE;                             // CCR0 interrupt enabled
-//	TACTL = TASSEL_1 + MC_1 + ID_3;           // ACLK/8, upmode
-//
-//	// Enable
-//	_EINT();
-//
-//	// Once placed in LPM3 the CPU will not continue executing other commands until
-//	// the LPM is exited. In this case the ISR exits the low Power mode.
-//	LPM3;
-//
-//
-//	//	  _BIS_SR(GIE+LPM3_bits);//+LPM3_bits);//CPUOFF);// + GIE);           // Enter LPM0 w/ interrupt
-//	//	  while(1)                         //Loop forever, we work with interrupts!
-//	//	  {}
-//	return;
-//}
-//
-//
-//
-//// Timer A0 interrupt service routine
-//#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
-//__interrupt void Timer_A (void)
-//{
-//	// turn on led
-////	Toggle_GPIO(P1_0);
-//
-////   _delay_cycles(500);
-////   P1OUT ^= BIT0;
-//   TACTL &= ~TAIFG;
-//
-//   // Disable the intrrupt
-//   CCTL0 &= ~CCIE;
-//   LPM3_EXIT;
-//   _DINT();
-//   return;
-//
-//}
 
 #endif /* MSP430_LIB_TIME_DELAY_H_ */

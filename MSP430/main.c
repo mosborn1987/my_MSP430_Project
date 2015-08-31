@@ -3,6 +3,7 @@
 #include <GPIOs.h>
 #include <my_Shift_Register.h>
 #include <MSP430_Clock.h>
+#include <LPM_time_delay.h>
 
 void timer_ms(unsigned int);
 
@@ -40,8 +41,8 @@ void main(void)
 //	  }
 
 //	  _LP_time_delay_ms(1000);
-	  _LP_time_delay_m(1);
-//	  _LP_time_delay_s(1);
+	  _LP_time_delay_s(1);
+//	  _LP_time_delay_m(1);
 	  Toggle_GPIO(P1_6);
   }
 }
