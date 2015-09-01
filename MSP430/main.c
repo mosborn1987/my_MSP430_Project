@@ -6,7 +6,7 @@
 
 
 void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength);
-
+void UART_init(void);
 static volatile char data;
 
 void main(void)
@@ -20,7 +20,24 @@ void main(void)
 	// Set the output state
 	pinMODE(P1_0, OUTPUT);
 	pinMODE(P1_6, OUTPUT);
+	UART_init();
 
+	while(1)
+	{
+		// Enter a value
+		UARTSendArray("Enter Value", 11);
+
+		// Wait for single value
+		__bis_SR_register(LPM0_bits + GIE); // Enter LPM0, interrupts enabled
+
+	}
+
+
+
+}
+
+void UART_init(void)
+{
 	BCSCTL1 = CALBC1_1MHZ; // Set DCO to 1MHz
 	DCOCTL = CALDCO_1MHZ; // Set DCO to 1MHz
 
@@ -34,7 +51,6 @@ void main(void)
 	UCA0CTL1 &= ~UCSWRST; // Initialize USCI state machine
 	IE2 |= UCA0RXIE; // Enable USCI_A0 RX interrupt
 
-	__bis_SR_register(LPM0_bits + GIE); // Enter LPM0, interrupts enabled
 }
 
 // Echo back RXed character, confirm TX buffer is ready first
@@ -42,7 +58,7 @@ void main(void)
 __interrupt void USCI0RX_ISR(void)
 {
 data = UCA0RXBUF;
-UARTSendArray("Received command: ", 18);
+//UARTSendArray("Received command: ", 18);
 UARTSendArray(&data, 1);
 UARTSendArray("\n\r", 2);
 
@@ -63,12 +79,16 @@ switch(data){
 
  default:
  {
-	UARTSendArray("Unknown Command: ", 17);
-	UARTSendArray(&data, 1);
-	UARTSendArray("\n\r", 2);
+//	UARTSendArray("Unknown Command: ", 17);
+//	UARTSendArray(&data, 1);
+//	UARTSendArray("\n\r", 2);
  }
  break;
  }
+
+_BIC_SR(LPM0_EXIT);
+_DINT();
+
 }
 
 void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength){
