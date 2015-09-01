@@ -5,9 +5,11 @@
 #include <LPM_time_delay.h>
 
 
+void UART_get(unsigned char number_of_chars, unsigned char *RxArray);
+
 void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength);
 void UART_init(void);
-static volatile char data;
+
 
 void main(void)
 {
@@ -20,24 +22,47 @@ void main(void)
 	// Set the output state
 	pinMODE(P1_0, OUTPUT);
 	pinMODE(P1_6, OUTPUT);
+
 	UART_init();
+	unsigned char return_Array[0x10];
+	unsigned char char_number = 3;
 
 	while(1)
 	{
 		// Enter a value
 		UARTSendArray("Enter Value", 11);
 
-		// Wait for single value
-		__bis_SR_register(LPM0_bits + GIE); // Enter LPM0, interrupts enabled
+		// Get Value
+		UART_get(char_number, return_Array);
+
+		// print retrived array
+		UARTSendArray(return_Array, char_number);
 
 	}
 
+}
 
 
+static volatile char data;
+
+void UART_get(unsigned char number_of_chars, unsigned char *RxArray)
+{
+	// Retrieve number of chars
+	while(number_of_chars != 0)
+	{
+		// Wait for single value
+		__bis_SR_register(LPM0_bits + GIE); // Enter LPM0, interrupts enabled
+		*RxArray = data;
+		RxArray++;
+		number_of_chars--;
+	}
+
+	return;
 }
 
 void UART_init(void)
 {
+	num_char = 0;
 	BCSCTL1 = CALBC1_1MHZ; // Set DCO to 1MHz
 	DCOCTL = CALDCO_1MHZ; // Set DCO to 1MHz
 
@@ -57,37 +82,39 @@ void UART_init(void)
 #pragma vector=USCIAB0RX_VECTOR
 __interrupt void USCI0RX_ISR(void)
 {
-data = UCA0RXBUF;
-//UARTSendArray("Received command: ", 18);
-UARTSendArray(&data, 1);
-UARTSendArray("\n\r", 2);
+	data = UCA0RXBUF;
 
-switch(data){
- case 'R':
- case 'r':
- {
-	 Toggle_GPIO(P1_0);
- }
- break;
+	// Echo Value
+	//UARTSendArray("Received command: ", 18);
+	UARTSendArray(&data, 1);
+	UARTSendArray("\n\r", 2);
 
- case 'G':
- case 'g':
- {
-	 Toggle_GPIO(P1_6);
- }
- break;
+	switch(data){
+		case 'R':
+		case 'r':
+		{
+			Toggle_GPIO(P1_0);
+		}
+		break;
 
- default:
- {
-//	UARTSendArray("Unknown Command: ", 17);
-//	UARTSendArray(&data, 1);
-//	UARTSendArray("\n\r", 2);
- }
- break;
- }
+		case 'G':
+		case 'g':
+		{
+			Toggle_GPIO(P1_6);
+		}
+		break;
 
-_BIC_SR(LPM0_EXIT);
-_DINT();
+		default:
+		{
+			//	UARTSendArray("Unknown Command: ", 17);
+			//	UARTSendArray(&data, 1);
+			//	UARTSendArray("\n\r", 2);
+		}
+		break;
+		}
+
+	_BIC_SR(LPM0_EXIT);
+	_DINT();
 
 }
 
