@@ -192,23 +192,23 @@ void UARTSendChar( unsigned char send_char)
 }
 
 
-////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 // Example
-//void UAR_Test(void)
-//{
-//	///////////////////////////////////////////////////////////////////
-//	// Declare buffer size and data type
-//	char buffer[20];
-//
-//	int Test_Number = 1;
-//	///////////////////////////////////////////////////////////////////
-//	// Format buffer with string
-//	sprintf( buffer, "UART Test #%d\n",Test_Number );
-//
-//	// Send formatted buffer to UART
-//	UARTSendArray(&buffer, strlen(buffer));
-//
-//}
+void UART_Test(void)
+{
+	///////////////////////////////////////////////////////////////////
+	// Declare buffer size and data type
+	char buffer[20];
+
+	int Test_Number = 1;
+	///////////////////////////////////////////////////////////////////
+	// Format buffer with string
+	sprintf( buffer, "UART Test #%d\n",Test_Number );
+
+	// Send formatted buffer to UART
+	UARTSendArray(&buffer, strlen(buffer));
+
+}
 
 
 #endif /* MSP430_LIB_UART_H_ */
