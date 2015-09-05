@@ -3,6 +3,8 @@
  *
  *  Created on: Sep 1, 2015
  *      Author: Mario Osborn
+ *
+ *      Note: Example included at the bottom
  */
 
 #ifndef MSP430_LIB_UART_H_
@@ -14,14 +16,16 @@
 static volatile char data;
 
 ////////////////////////////////////////////////////////////////////////
-// Function Declaration
+// Function Declaration - Each Function prototype is defined later
 void UART_init(void);
 void UART_get_array(unsigned char number_of_chars, unsigned char *RxArray);
 char UART_get_single_char(void);
 void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength);
 void UARTSendChar( unsigned char);
+void UART_Test( void );
+
 ////////////////////////////////////////////////////////////////////////
-// Configure clocks and hardware
+// Configure clocks and hardware needed for the UART
 void UART_init(void)
 {
 	////////////////////////////////////////////////////////////////////
@@ -143,35 +147,68 @@ __interrupt void USCI0RX_ISR(void)
 
 }
 
-void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength){
- // Send number of bytes Specified in ArrayLength in the array at using the hardware UART 0
- // Example usage: UARTSendArray("Hello", 5);
- // int data[2]={1023, 235};
- // UARTSendArray(data, 4); // Note because the UART transmits bytes it is necessary to send two bytes for each integer hence the data length is twice the array length
 
+////////////////////////////////////////////////////////////////////////
+// Print array or string in 'single quote' notation.
+void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength)
+{
+	////////////////////////////////////////////////////////////////////
+	// Prints the specified amount of chars
 	while(ArrayLength--)
-	{ // Loop until StringLength == 0 and post decrement
-		while(!(IFG2 & UCA0TXIFG)); // Wait for TX buffer to be ready for new data
-		UCA0TXBUF = *TxArray; //Write the character at the location specified py the pointer
-		TxArray++; //Increment the TxString pointer to point to the next character
+	{
+		////////////////////////////////////////////////////////////////
+		// Waits until the TX buffer is ready to recieve new data
+		while(!(IFG2 & UCA0TXIFG));
+
+		////////////////////////////////////////////////////////////////////
+		// Write the character at the location specified py the pointer
+		UCA0TXBUF = *TxArray;
+
+		////////////////////////////////////////////////////////////////////
+		// Increment the TxArray pointer to point to the next character
+		TxArray++;
+
 	}
 
+	return;
+
 }
 
-//UARTSendArrayln(unsigned char *TxArray, unsigned char ArrayLength)
-//{
-//	UARTSendArray(TxArray, ArrayLength);
-//
-//}
 
+////////////////////////////////////////////////////////////////////////
+// Send a single char value. Pass by value.
 void UARTSendChar( unsigned char send_char)
 {
-	while(!(IFG2 & UCA0TXIFG)); // Wait for TX buffer to be ready for new data
-	UCA0TXBUF = send_char; //Write the character at the location specified py the pointer
+	////////////////////////////////////////////////////////////////
+	// Waits until the TX buffer is ready to recieve new data
+	while(!(IFG2 & UCA0TXIFG));
+
+	////////////////////////////////////////////////////////////////////
+	// Writes the passed value to the UART buffer
+	UCA0TXBUF = send_char;
+
+	return;
 
 }
 
 
+////////////////////////////////////////////////////////////////////////
+// Example
+//void UAR_Test(void)
+//{
+//	///////////////////////////////////////////////////////////////////
+//	// Declare buffer size and data type
+//	char buffer[20];
+//
+//	int Test_Number = 1;
+//	///////////////////////////////////////////////////////////////////
+//	// Format buffer with string
+//	sprintf( buffer, "UART Test #%d\n",Test_Number );
+//
+//	// Send formatted buffer to UART
+//	UARTSendArray(&buffer, strlen(buffer));
+//
+//}
 
 
 #endif /* MSP430_LIB_UART_H_ */
