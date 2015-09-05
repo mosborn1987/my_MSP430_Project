@@ -3,208 +3,234 @@
 #include <GPIOs.h>
 #include <my_Shift_Register.h>
 #include <LPM_time_delay.h>
+#include <UART.h>
+#include <my_UART.h>
+#include <stdio.h>
+#include <stdlib.h>
 
+//void blinkInterrupt();
+//void ConfigTimerA();
+//#define LED P1_6
 
-void UART_get(unsigned char number_of_chars, unsigned char *RxArray);
-
-void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength);
-void UART_init(void);
-
+void Reset_ISR();
 
 void main(void)
 {
-	WDTCTL = WDTPW + WDTHOLD; // Stop WDT
-
-	// Set up the pin P1_0 and P1_6
-	digitalWrite(P1_0, LOW);
-	digitalWrite(P1_6, LOW);
-
-	// Set the output state
-	pinMODE(P1_0, OUTPUT);
-	pinMODE(P1_6, OUTPUT);
-
+	// Initialize
+	WDTCTL = WDTPW + WDTHOLD;     	// Stop WDT
 	UART_init();
-	unsigned char return_Array[0x10];
-	unsigned char char_number = 3;
+	char buffer[250];
 
-	while(1)
-	{
-		// Enter a value
-		UARTSendArray("Enter Value", 11);
+	// UART Test
+	sprintf( buffer, "\nUART Working\n\r");
+	UARTSendArray(&buffer, strlen(buffer));
 
-		// Get Value
-		UART_get(char_number, return_Array);
 
-		// print retrived array
-		UARTSendArray(return_Array, char_number);
 
-	}
+	CCTL0 = CCIE;                   // CCR0 interrupt enabled
+	TACTL = TASSEL_2 + MC_1 + ID_3;   // SMCLK/8, upmode
+	CCR0 =  65535;                    // 12.5 Hz
+	TAR = 0;							/* Timer A Counter Register */
+	P1OUT &= 0x01;             		// Shut down everything
+	P1DIR = 0x00;
 
+	P1DIR |= BIT0 + BIT6;            	// P1.0 and P1.6 pins output the rest are input
+
+	P1REN |= BIT3;                   	// Enable internal pull-up/down resistors
+	P1OUT |= BIT3;                   	//Select pull-up mode for P1.3
+
+	P1IES &= ~BIT3;                    // P1.3 lo/Hi edge
+	P1IE |= BIT3;                     // P1.3 interrupt enabled
+	P1IFG &= ~BIT3;                  	// P1.3 IFG cleared
+
+	unsigned long T0 = 0x00;
+	unsigned long T1 = 0x00;
+	unsigned long T2 = 0x00;
+	unsigned long Duty_Cycle  = 0;
+//	unsigned int DataArray[100];
+	int i = 0;
+
+//	int data[150];
+	int samples = 10;
+	_BIS_SR(GIE);         			// Enter LPM0 w/ interrupt
+  while(1)                          //Loop forever, we work with interrupts!
+  {
+//	  for(i = 0; i<=samples; i++)
+	  {
+		  ////////////////////////////////////////////////////////////////////////////////
+		  // initialize
+//		  P1IES &= ~BIT3;                    // P1.3 lo/Hi edge
+		  TAR = 0;							// initialize count
+
+		  ////////////////////////////////////////////////////////////////////////////////
+		  // The Rise
+
+		  while((P1IES&BIT3)==0) 			// While set to lo/Hi edge
+		  {}
+
+		  // Initial time offset
+		  TAR = 0;
+		  T0 = TAR;
+//		  TAR = 0;
+
+		  ////////////////////////////////////////////////////////////////////////////////
+		  // The Drop
+		  // While H
+		  while( (P1IES&BIT3))
+		  {}
+		  // Set Time 1
+		  T1 = TAR;
+		  TAR = 0;
+
+		  ////////////////////////////////////////////////////////////////////////////////
+		  // The second rise
+		  while((P1IES&BIT3) ==0)
+		  {}
+
+		  // Set Time 3
+		  T2 = TAR;
+		  TAR = 0;
+
+		  // Calculate the Duty Cycle
+		  Duty_Cycle = ((T1*100)/(T1+T2));
+	  }
+
+	// Print T0
+	sprintf( buffer, "T0 Value: %d\n\r", T0);
+	UARTSendArray(&buffer, strlen(buffer));
+
+	// Print T1
+	sprintf( buffer, "T1 Value: %d\n\r", T1);
+	UARTSendArray(&buffer, strlen(buffer));
+
+	// Print T2
+	sprintf( buffer, "T2 Value: %d\n\r", T2);
+	UARTSendArray(&buffer, strlen(buffer));
+
+	// print duty cycles
+	sprintf( buffer, "Duty Cycle Value: %d\n\r", Duty_Cycle);
+	UARTSendArray(&buffer, strlen(buffer));
+	  P1OUT ^= BIT6; // Toggle LED
+	  _delay_cycles(1000);
+  }
 }
 
 
-static volatile char data;
 
-void UART_get(unsigned char number_of_chars, unsigned char *RxArray)
+// Port 1 interrupt service routine
+#pragma vector=PORT1_VECTOR
+__interrupt void Port_1(void)
 {
-	// Retrieve number of chars
-	while(number_of_chars != 0)
-	{
-		// Wait for single value
-		__bis_SR_register(LPM0_bits + GIE); // Enter LPM0, interrupts enabled
-		*RxArray = data;
-		RxArray++;
-		number_of_chars--;
-	}
+//	TAR = 0;
+	P1OUT ^= BIT0;                      // Toggle P1.6
+	P1IFG &= ~BIT3;                     // P1.3 IFG cleared
+	P1IES ^= BIT3;						// Toggle edge sensitivity
 
-	return;
 }
 
-void UART_init(void)
+#pragma vector=TIMER0_A0_VECTOR
+__interrupt void Timer_A0(void)
 {
-	num_char = 0;
-	BCSCTL1 = CALBC1_1MHZ; // Set DCO to 1MHz
-	DCOCTL = CALDCO_1MHZ; // Set DCO to 1MHz
 
-	/* Configure hardware UART */
-	P1SEL = BIT1 + BIT2 ; // P1.1 = RXD, P1.2=TXD
-	P1SEL2 = BIT1 + BIT2 ; // P1.1 = RXD, P1.2=TXD
-	UCA0CTL1 |= UCSSEL_2; // Use SMCLK
-	UCA0BR0 = 104; // Set baud rate to 9600 with 1MHz clock (Data Sheet 15.3.13)
-	UCA0BR1 = 0; // Set baud rate to 9600 with 1MHz clock
-	UCA0MCTL = UCBRS0; // Modulation UCBRSx = 1
-	UCA0CTL1 &= ~UCSWRST; // Initialize USCI state machine
-	IE2 |= UCA0RXIE; // Enable USCI_A0 RX interrupt
+	TACTL &= ~TAIFG;
+//    Toggle_GPIO(LED);
+
+//When we exit the interrupt routine we return to Low Power Mode
 
 }
-
-// Echo back RXed character, confirm TX buffer is ready first
-#pragma vector=USCIAB0RX_VECTOR
-__interrupt void USCI0RX_ISR(void)
-{
-	data = UCA0RXBUF;
-
-	// Echo Value
-	//UARTSendArray("Received command: ", 18);
-	UARTSendArray(&data, 1);
-	UARTSendArray("\n\r", 2);
-
-	switch(data){
-		case 'R':
-		case 'r':
-		{
-			Toggle_GPIO(P1_0);
-		}
-		break;
-
-		case 'G':
-		case 'g':
-		{
-			Toggle_GPIO(P1_6);
-		}
-		break;
-
-		default:
-		{
-			//	UARTSendArray("Unknown Command: ", 17);
-			//	UARTSendArray(&data, 1);
-			//	UARTSendArray("\n\r", 2);
-		}
-		break;
-		}
-
-	_BIC_SR(LPM0_EXIT);
-	_DINT();
-
-}
-
-void UARTSendArray(unsigned char *TxArray, unsigned char ArrayLength){
- // Send number of bytes Specified in ArrayLength in the array at using the hardware UART 0
- // Example usage: UARTSendArray("Hello", 5);
- // int data[2]={1023, 235};
- // UARTSendArray(data, 4); // Note because the UART transmits bytes it is necessary to send two bytes for each integer hence the data length is twice the array length
-
-	while(ArrayLength--)
-	{ // Loop until StringLength == 0 and post decrement
-		while(!(IFG2 & UCA0TXIFG)); // Wait for TX buffer to be ready for new data
-		UCA0TXBUF = *TxArray; //Write the character at the location specified py the pointer
-		TxArray++; //Increment the TxString pointer to point to the next character
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-//void Init_UART(void);
-//void OUTA(void);
 //
-//void main(void)
-//{
-//  WDTCTL = WDTPW + WDTHOLD;     // Stop WDT
-//  Init_UART();
-//  while(1)
-//  {
-//	  OUTA();
-//  }
-////  OUTA();
 //
-////  digitalWrite(P1_6, LOW);
-////  digitalWrite(P1_0, LOW);
-////  pinMODE(P1_6, OUTPUT);
+//
+//
+//
+//// Scratch
+////WDTCTL = WDT_ADLY_1000;// + WDTHOLD; // Stop WDT
+//////	Reset_ISR();
+//////	IE1 = 0xFF;//NMIIE;
+////_EINT();
 ////
-////  P1DIR |= BIT0 + BIT6;            // P1.0 and P1.6 pins output the rest are input
+////IFG1 = 0x00;
+////IFG1 = PORIFG+RSTIFG+WDTIFG;
+////IE1 = WDTIE;//NMIIE+OFIE+WDTIE;// 0x02;
+////
+////
+////
+////// Set up the pin P1_0 and P1_6
+////digitalWrite(P1_0, LOW);
+////digitalWrite(P1_6, LOW);
+////
+////// Set the output state
+////pinMODE(P1_0, OUTPUT);
+////pinMODE(P1_6, OUTPUT);
+////
+////blinkInterrupt();
 //
-//
-//}
-//
-//void OUTA(void)
+//void blinkInterrupt()
 //{
-//	char register_5 = IFG2;
-//	//
-//	while((register_5&0x02)==0)
-//	{
-//		register_5 = IFG2;
-//	}// do nothing
-////	OUTA		push R5
-////	lpa 		mov.b &IFG2,R5
-////				and.b #0x02,R5
-////				cmp.b #0x00,R5
-////				jz lpa
 //
-//	// Send the data to the transmit buffer UCA0TXBUF = A;
-//	char register_4 = "A";
-//	UCA0TXBUF = register_4;
-//	return;
-////				mov.b R4,&UCA0TXBUF
-////				pop R5
-////				ret
+//	ConfigTimerA(1000);	//Configure the timer
 //
+//    while (1)
+//    {
+//        _bis_SR_register(LPM3_bits + GIE); //Enter Low Power Mode 3 with interrupts
+//    }
 //
 //}
 //
+///*****************************************************************
+//*
+//* FUNCTION:	configTimerA
+//*
+//* PURPOSE:	Configure the TimerA
+//*
+//* PARAMETERS:	delayCycles: number of clock cycles to delay
+//*
+//*****************************************************************/
 //
-//void Init_UART(void)
+//void ConfigTimerA(unsigned int delayCycles)
 //{
-//	// C - instruction		// Assembly instruction equivalance
-//	BCSCTL1 = CALBC1_1MHZ;	//	mov.b &CALBC1_1MHZ, &BCSCTL1
-//	DCOCTL = CALDCO_1MHZ;	//	mov.b &CALDCO_1MHZ, &DCOCTL
-//	P1SEL = 0x06;			//  BIT1 and BIT2	//	mov.b #0x06,&P1SEL
-//	P1SEL2 = 0x06;			//	mov.b #0x06,&P1SEL2
-//	UCA0CTL0 = 0x00;		//	mov.b #0x00,&UCA0CTL0
-//	UCA0CTL1 = 0x81;		//	mov.b #0x81,&UCA0CTL1
-//	UCA0BR1 = 0x00;			//	mov.b #0x00,&UCA0BR1
-//	UCA0BR0 = 0x068;		//	mov.b #0x68,&UCA0BR0
-//	UCA0MCTL = 0x06;		//	mov.b #0x06,&UCA0MCTL
-//	UCA0STAT = 0x00;		//	mov.b #0x00,&UCA0STAT
-//	UCA0CTL1 = 0x08;		//	mov.b #0x80,&UCA0CTL1
-//	IE2 = 0x00;				//	mov.b #0x00,&IE2
-//	return;					//	ret
+//
+//	// Configure ACLK Source
+//	// Can this value be lessoned?
+//	// If so the power drawn by the msp430 can be greately
+//	// reduced
+//	BCSCTL1 = CALBC1_1MHZ;
+//
+//	// write a 0 to TxR bit. This will reset the time and improve accuracy
+//
+//	// Configure Timer_A register
+//    TACCTL0 |= CCIE;	//Enable Interrupts on Timer
+//    TACCR0 = delayCycles;	//Number of cycles in the timer
+//    TACTL |= TASSEL_1;	//Use ACLK as source for timer
+//    TACTL |= MC_3;	//Use UP mode timer
 //
 //}
+//
+//#pragma vector=RESET_VECTOR
+//__interrupt void Reset_ISR(void)
+//{
+//	IFG1 = 0x00;
+////	main(0);
+//	_BIC_SR(LPM0_EXIT);
+//
+//	_DINT();
+////	_bic_SR_register_on_exit(LPM3_bits);
+//}
+//
+//
+///*****************************************************************
+//*
+//* FUNCTION:	Timer_A0
+//*
+//* PURPOSE:	Interrupt Handler to service the TimerA0 interrupt
+//*
+//* PARAMETERS:	none
+//*
+//*****************************************************************/
+//#pragma vector =WDT_VECTOR
+//__interrupt void WDT_Routine(void)
+//{
+////	IFG1 = 0x00;
+//}
+//
+
