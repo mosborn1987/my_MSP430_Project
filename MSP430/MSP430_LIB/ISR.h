@@ -18,17 +18,25 @@
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - Timer A
-extern int MODE_TIMER_A = 	0x00;
-#define TA_ISR_DEFUALT		0x00
-#define TA_ISR_TIMER 		0x01
-#define TA_ISR_Mx2125 		0x02
+extern int MODE_TIMER_A = 		0x00;
+#define TA_ISR_DEFUALT			0x00
+#define TA_ISR_TIMER 			0x01
+#define TA_ISR_Mx2125 			0x02
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - PORT 1
-extern int MODE_PORT_1 = 	0x00;
-#define P1_ISR_DEFAULT		0x00;
-#define P1_ISR_Mx2125		0x01
-//#define P1_ISR_Mx2125_y		0x02
+extern int PORT_1_MODE 		= 	0x00;
+extern int P1_GPIO_CHANNEL = 	0x00;
+#define P1_ISR_DEFAULT			0x00;
+#define P1_ISR_PWM_READ			0x01
+
+//////////////////////////////////////////////////////////////////
+// Interrupt Vector - PORT 1
+extern int PORT_2_MODE 		=	0x00;
+extern int P2_GPIO_CHANNEL 	=	0x00;
+#define P2_ISR_DEFAULT			0x00;
+#define P2_ISR_PWM_READ			0x01
+
 
 //////////////////////////////////////////////////////////////////
 // Timer A0 interrupt service routine
@@ -55,6 +63,8 @@ __interrupt void Timer_A (void)
 		_DINT();
 	}
 
+	// This code will probably never be reached.
+	// But just in case needed
 	if( MODE_TIMER_A == TA_ISR_Mx2125)
 	{
 		TACTL &= ~TAIFG;
@@ -67,30 +77,59 @@ __interrupt void Timer_A (void)
 #pragma vector=PORT1_VECTOR
 __interrupt void Port_1(void)
 {
-	// Default
-//	if(MODE_PORT_1 == P1_ISR_DEFAULT)
+	// Masks GPIO bit
+	int bit_n = (P1_GPIO_CHANNEL & GPIO_MASK);
+
+//	// Default
+//	if( PORT_1_MODE == P1_ISR_DEFAULT)
 //	{
-//		// Clear All Flags
-////		P1IFG = 0x00;
+//		// ISR trap
+//		while(1)
+//		{ }
+//
 //	}
 
-	// Accelerometer
-	if(MODE_PORT_1 == P1_ISR_Mx2125)
+
+
+	// PMW Read - Pulse-width-modulation
+	if(PORT_1_MODE == 0)
 	{
 		P1IFG &= ~(BIT3);                     // P1.3 IFG cleared
-		P1IES ^= BIT3;						// Toggle edge sensitivity
+		P1IES ^=  BIT3;						// Toggle edge sensitivity
 
 		P1IFG &= ~(BIT4);                     // P1.3 IFG cleared
 		P1IES ^= BIT4;						// Toggle edge sensitivity
 
+//		P1IFG &= ~(bit_n);                     // P1.3 IFG cleared
+//		P1IES ^= bit_n;						// Toggle edge sensitivity
+
 	}
-//
-//	if(MODE_PORT_1 == P1_ISR_Mx2125_y)
+
+}
+
+//////////////////////////////////////////////////////////////////v
+// Port 2 interrupt service routine
+#pragma vector=PORT2_VECTOR
+__interrupt void Port_2(void)
+{
+	// Masks the bit of the GPIO
+	int bit_n = (GPIO_MASK & P2_GPIO_CHANNEL);
+
+////	 Default
+//	if(PORT_2_MODE == P2_ISR_DEFAULT)
 //	{
-//		P1IFG &= ~(BIT4);                     // P1.3 IFG cleared
-//		P1IES ^= BIT4;						// Toggle edge sensitivity
-//
+//		// ISR Trap if MODE not set
+//		while(1)
+//		{}
 //	}
+
+	// PMW Read - Pulse-width-modulation
+	if(PORT_2_MODE == P2_ISR_PWM_READ)
+	{
+		P2IFG &= ~(bit_n);                     // P1.3 IFG cleared
+		P2IES ^= bit_n;						// Toggle edge sensitivity
+
+	}
 
 }
 
