@@ -94,14 +94,14 @@ __interrupt void Port_1(void)
 	// PMW Read - Pulse-width-modulation
 	if(PORT_1_MODE == 0)
 	{
-		P1IFG &= ~(BIT3);                     // P1.3 IFG cleared
-		P1IES ^=  BIT3;						// Toggle edge sensitivity
+//		P1IFG &= ~(BIT3);                     // P1.3 IFG cleared
+//		P1IES ^=  BIT3;						// Toggle edge sensitivity
+//
+//		P1IFG &= ~(BIT4);                     // P1.3 IFG cleared
+//		P1IES ^= BIT4;						// Toggle edge sensitivity
 
-		P1IFG &= ~(BIT4);                     // P1.3 IFG cleared
-		P1IES ^= BIT4;						// Toggle edge sensitivity
-
-//		P1IFG &= ~(bit_n);                     // P1.3 IFG cleared
-//		P1IES ^= bit_n;						// Toggle edge sensitivity
+		P1IFG &= ~(bit_n);                     // P1.3 IFG cleared
+		P1IES ^= bit_n;						// Toggle edge sensitivity
 
 	}
 

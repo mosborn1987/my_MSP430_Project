@@ -209,6 +209,9 @@ int take_sample(void)
 	T2 = TAR;
 	TAR = 0;
 
+	// Clear Enable Flag
+	P1IE  &= ~(m_GPIO_bit);
+
 	// Calculate the Duty Cycle
 	Duty_Cycle = ((T1*100)/(T1+T2));
 

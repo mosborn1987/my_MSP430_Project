@@ -23,14 +23,14 @@ void main(void)
 	while(1)
 	{
 		int x_PWM = read_GPIO(P1_3);
-//		int y_PWM = read_GPIO(P1_4);
+		int y_PWM = read_GPIO(P1_4);
 
 		// Send to uart
 		UART_init();
 		sprintf(buffer, "\n\r x = %d    ", x_PWM);
 		UARTSendArray(&buffer, strlen(buffer) );
-//		sprintf(buffer, "y = %d\n\r", y_PWM);
-//		UARTSendArray(&buffer, strlen(buffer));
+		sprintf(buffer, "y = %d\n\r", y_PWM);
+		UARTSendArray(&buffer, strlen(buffer));
 
 		// Time delay
 		_LP_time_delay_init();
