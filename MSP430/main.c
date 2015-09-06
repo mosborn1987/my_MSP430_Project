@@ -9,37 +9,15 @@
 #include <stdlib.h>
 #include <ISR.h>
 #include <Mx2125.h>
+#include <my_Mx2125.h>
 
 
 void main(void)
 {
 	// Initialize
 	WDTCTL = WDTPW + WDTHOLD;     	// Stop WDT
-	UART_init();
-	char buffer[50];
-
-	// UART Test
-	sprintf( buffer, "\nUART Working\n\r");
-	UARTSendArray(&buffer, strlen(buffer));
-
-	while(1)
-	{
-		sprintf( buffer, "\nSample X:\n\r");
-		UARTSendArray(&buffer, strlen(buffer));
-		// Accerometer Test
-		init_Mx2125(P1_3, P1_4);
-		sample_x();
-		print_sample();
-
-		sprintf( buffer, "\nSample y:\n\r");
-		UARTSendArray(&buffer, strlen(buffer));
-		sample_y();
-		print_sample();
-
-		_LP_time_delay_init();
-		_LP_time_delay_s(1);
-	}
-
+//	infinit_sample();
+	LED_Sample();
 
 
 }
