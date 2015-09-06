@@ -65,20 +65,22 @@ void LED_Sample(void)
 		// Sample y
 		y = sample_y();
 //		_DINT();
+		x += 4;
+		y += 3;
 
-		if( x>=52)
+		if( x>=54)
 		{
 			digitalWrite(RED, HIGH);
 			digitalWrite(GREEN, LOW );
 		}
 
-		if(x<=48)
+		if(x<=46)
 		{
 			digitalWrite(RED, LOW);
 			digitalWrite(GREEN, HIGH );
 		}
 
-		if( (x<=51)&&(x>=49) )
+		if( (x<=53)&&(x>=47) )
 		{
 			digitalWrite(RED, LOW);
 			digitalWrite(GREEN, LOW );
@@ -86,13 +88,13 @@ void LED_Sample(void)
 
 
 		///////////////////
-		if( y>=52)
+		if( y>=54)
 		{
 			digitalWrite(RED1, HIGH);
 			digitalWrite(RED2, LOW );
 		}
 
-		if(y<=48)
+		if(y<=46)
 		{
 			digitalWrite(RED1, LOW);
 			digitalWrite(RED2, HIGH );
@@ -107,7 +109,7 @@ void LED_Sample(void)
 		///////////
 
 		_LP_time_delay_init();
-		_LP_time_delay_ms(250);
+//		_LP_time_delay_ms(250);
 
 
 

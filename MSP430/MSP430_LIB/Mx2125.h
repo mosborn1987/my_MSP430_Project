@@ -13,6 +13,8 @@
 #include <msp430g2553.h>
 #include <GPIOs.h>
 #include <UART.h>
+#include <math.h>
+#include <msp430_math.h>
 
 //////////////////////////////////////////////////////////////////
 // Extern default value values
@@ -37,6 +39,7 @@ void init_GPIO_y(int y);
 int sample_x(void);
 int sample_y(void);
 int take_sample(int);
+int take_samples(int pin, int samples);
 void print_sample(void);
 
 
@@ -96,16 +99,20 @@ void init_GPIO_y(int y)
 
 }
 
+#define sample_size 15
 int sample_x(void)
 {
+	// Enable x int
+	P1IE |= (x_pin & LOW_BYTE_MASK);
+
 	// Disable Y
 	P1IE &= ~(y_pin & LOW_BYTE_MASK);                     // y interrupt disabled
-	_BIS_SR(GIE);         			// Enable Interrupt
+//	_BIS_SR(GIE);         			// Enable Interrupt
 
 //	MODE_PORT_1 = P1_ISR_Mx2125_x;
 	sample_pin = x_pin & LOW_BYTE_MASK;
 
-	return take_sample(sample_pin);
+	return take_samples(sample_pin, sample_size);
 }
 
 int sample_y(void)
@@ -116,16 +123,49 @@ int sample_y(void)
 	// Disable x
 	P1IE &= ~(x_pin & LOW_BYTE_MASK);                     // y interrupt disabled
 
-	_BIS_SR(GIE);         			// Enable Interrupt
+//	_BIS_SR(GIE);         			// Enable Interrupt
 
 //	MODE_PORT_1 = P1_ISR_Mx2125_y;
 	sample_pin = y_pin & LOW_BYTE_MASK;
 
-	return take_sample(sample_pin);
+	return take_samples(sample_pin, sample_size);
+
+}
+
+
+int take_samples(int pin, int samples)
+{
+	int sample_Array[20];
+	int i = 0 ;
+
+	// take samples
+	for(i = 0; i < samples; i++)
+	{
+		// Collect sample in array
+		sample_Array[i] = take_sample(pin);
+
+	}
+
+	float average = calc_average(sample_Array, samples);
+
+
+	// Perform Statistics on sample
+	float temp_STD = clac_Variance(sample_Array, samples, average);
+
+	// calculate standard deviation
+	temp_STD = calc_STD(temp_STD);
+
+	// return true average
+	float clean_average = calc_Clean_Average(sample_Array, samples, 2, temp_STD, average);
+
+	return (int)clean_average;
+
 }
 
 int take_sample(int pin)
 {
+	_BIS_SR(GIE);         			// Enable Interrupt
+
 	// initialize
 	TAR = 0;							// initialize count
 
@@ -166,6 +206,8 @@ int take_sample(int pin)
 	return Duty_Cycle;
 
 }
+
+
 
 void print_sample(void)
 {
