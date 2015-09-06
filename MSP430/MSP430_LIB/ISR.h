@@ -28,6 +28,7 @@ extern int MODE_TIMER_A = 	0x00;
 extern int MODE_PORT_1 = 	0x00;
 #define P1_ISR_DEFAULT		0x00;
 #define P1_ISR_Mx2125		0x01
+//#define P1_ISR_Mx2125_y		0x02
 
 //////////////////////////////////////////////////////////////////
 // Timer A0 interrupt service routine
@@ -66,13 +67,30 @@ __interrupt void Timer_A (void)
 #pragma vector=PORT1_VECTOR
 __interrupt void Port_1(void)
 {
+	// Default
+//	if(MODE_PORT_1 == P1_ISR_DEFAULT)
+//	{
+//		// Clear All Flags
+////		P1IFG = 0x00;
+//	}
+
 	// Accelerometer
 	if(MODE_PORT_1 == P1_ISR_Mx2125)
 	{
-		P1IFG &= ~BIT3;                     // P1.3 IFG cleared
+		P1IFG &= ~(BIT3);                     // P1.3 IFG cleared
 		P1IES ^= BIT3;						// Toggle edge sensitivity
 
+		P1IFG &= ~(BIT4);                     // P1.3 IFG cleared
+		P1IES ^= BIT4;						// Toggle edge sensitivity
+
 	}
+//
+//	if(MODE_PORT_1 == P1_ISR_Mx2125_y)
+//	{
+//		P1IFG &= ~(BIT4);                     // P1.3 IFG cleared
+//		P1IES ^= BIT4;						// Toggle edge sensitivity
+//
+//	}
 
 }
 
