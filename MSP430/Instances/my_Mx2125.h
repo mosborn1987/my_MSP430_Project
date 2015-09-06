@@ -39,13 +39,17 @@ void infinit_sample(void)
 	}
 
 }
-
+#define RED P1_0
+#define GREEN P1_6
+#define RED1 P2_4
+#define RED2 P2_5
 void LED_Sample(void)
 {
-	pinMODE(P1_0, OUTPUT);
-	pinMODE(P1_6, OUTPUT);
-	digitalWrite(P1_0, LOW);
-	digitalWrite(P1_6, LOW);
+	pinMODE(RED|GREEN, OUTPUT);
+	digitalWrite(RED|GREEN, LOW);
+
+	pinMODE(RED1|RED2, OUTPUT);
+	digitalWrite(RED1|RED2, LOW);
 
 	init_Mx2125(P1_3, P1_4);
 	int x = 0;
@@ -60,24 +64,47 @@ void LED_Sample(void)
 
 		// Sample y
 		y = sample_y();
+//		_DINT();
 
 		if( x>=52)
 		{
-			digitalWrite(P1_0, HIGH);
-			digitalWrite(P1_6, LOW );
+			digitalWrite(RED, HIGH);
+			digitalWrite(GREEN, LOW );
 		}
 
 		if(x<=48)
 		{
-			digitalWrite(P1_0, LOW);
-			digitalWrite(P1_6, HIGH );
+			digitalWrite(RED, LOW);
+			digitalWrite(GREEN, HIGH );
 		}
 
 		if( (x<=51)&&(x>=49) )
 		{
-			digitalWrite(P1_0, LOW);
-			digitalWrite(P1_6, LOW );
+			digitalWrite(RED, LOW);
+			digitalWrite(GREEN, LOW );
 		}
+
+
+		///////////////////
+		if( y>=52)
+		{
+			digitalWrite(RED1, HIGH);
+			digitalWrite(RED2, LOW );
+		}
+
+		if(y<=48)
+		{
+			digitalWrite(RED1, LOW);
+			digitalWrite(RED2, HIGH );
+		}
+
+		if( (y<=51)&&(y>=49) )
+		{
+			digitalWrite(RED1, LOW);
+			digitalWrite(RED2, LOW );
+		}
+
+		///////////
 
 		_LP_time_delay_init();
 		_LP_time_delay_ms(250);

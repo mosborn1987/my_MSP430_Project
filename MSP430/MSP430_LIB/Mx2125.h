@@ -153,6 +153,9 @@ int take_sample(int pin)
 	while((P1IES & pin) ==0)
 	{}
 
+	// Disable Global Interrupt
+	_DINT();
+
 	// Set Time 3
 	T2 = TAR;
 	TAR = 0;
