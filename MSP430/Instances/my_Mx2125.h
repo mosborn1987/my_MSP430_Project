@@ -65,8 +65,8 @@ void LED_Sample(void)
 		// Sample y
 		y = sample_y();
 //		_DINT();
-		x += 4;
-		y += 3;
+//		x += 4;
+//		y += 3;
 
 		if( x>=54)
 		{

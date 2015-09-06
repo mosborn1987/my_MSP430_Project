@@ -76,7 +76,7 @@ void init_GPIO_x(int x)
 	P1REN |= (x_pin & LOW_BYTE_MASK); 			// Enable internal pull-up/down resistors
 	P1OUT |= (x_pin & LOW_BYTE_MASK);                   	//Select pull-up mode for P1.3
 
-	P1IES &= ~(x_pin & LOW_BYTE_MASK);                    // P1.3 lo/Hi edge
+	P1IES |= (x_pin & LOW_BYTE_MASK);                    // P1.3 Hi/lo edge
 	P1IE |= (x_pin & LOW_BYTE_MASK);                     // P1.3 interrupt enabled
 	P1IFG &= ~(x_pin & LOW_BYTE_MASK);                  	// P1.3 IFG cleared
 }
@@ -93,13 +93,13 @@ void init_GPIO_y(int y)
 	P1REN |= (x_pin & LOW_BYTE_MASK); 			// Enable internal pull-up/down resistors
 	P1OUT |= (x_pin & LOW_BYTE_MASK);                   	//Select pull-up mode for P1.3
 
-	P1IES &= ~(x_pin & LOW_BYTE_MASK);                    // P1.3 lo/Hi edge
+	P1IES |= (x_pin & LOW_BYTE_MASK);                    // P1.3 Hi/lo edge
 	P1IE |= (x_pin & LOW_BYTE_MASK);                     // P1.3 interrupt enabled
 	P1IFG &= ~(x_pin & LOW_BYTE_MASK);                  	// P1.3 IFG cleared
 
 }
 
-#define sample_size 15
+#define sample_size 10
 int sample_x(void)
 {
 	// Enable x int
@@ -112,7 +112,7 @@ int sample_x(void)
 //	MODE_PORT_1 = P1_ISR_Mx2125_x;
 	sample_pin = x_pin & LOW_BYTE_MASK;
 
-	return take_samples(sample_pin, sample_size);
+	return take_sample(sample_pin);//, sample_size);
 }
 
 int sample_y(void)
@@ -128,7 +128,7 @@ int sample_y(void)
 //	MODE_PORT_1 = P1_ISR_Mx2125_y;
 	sample_pin = y_pin & LOW_BYTE_MASK;
 
-	return take_samples(sample_pin, sample_size);
+	return take_sample(sample_pin);//, sample_size);
 
 }
 
@@ -165,6 +165,11 @@ int take_samples(int pin, int samples)
 int take_sample(int pin)
 {
 	_BIS_SR(GIE);         			// Enable Interrupt
+
+	////////////////////////////////////////////////////////////////////////////////
+	// This line of code will toss the first sample
+	while( (P1IES & pin))
+	{}
 
 	// initialize
 	TAR = 0;							// initialize count
