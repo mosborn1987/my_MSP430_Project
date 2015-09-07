@@ -8,7 +8,21 @@
 #ifndef MSP430_LIB_LPM_TIME_DELAY_H_
 #define MSP430_LIB_LPM_TIME_DELAY_H_
 
+//***********************************************************
+// Included Library(s)
+//***********************************************************
 #include <ISR.h>
+
+
+//***********************************************************
+// Function Prototypes
+//***********************************************************
+void _LP_time_delay_init(void);
+void _LP_time_delay_us( int us_delay );
+void _LP_time_delay_ms( int ms_delay);
+void _LP_time_delay_s( int s_delay);
+void _LP_time_delay_m( int m_delay);
+
 
 //////////////////////////////////////////////////////////////////
 // The following time delay functions take advantage of the low
@@ -54,6 +68,8 @@ void _LP_time_delay_us( int us_delay )
 // This function is not ready to function yet
 void _LP_time_delay_ms( int ms_delay)
 {
+	_LP_time_delay_init();
+
 	int i = 0;
 	for( i = ms_delay; i>0; i-- )
 	{
@@ -98,6 +114,8 @@ void _LP_time_delay_ms( int ms_delay)
 #define cal 0.876680493268786
 void _LP_time_delay_s( int s_delay)
 {
+	_LP_time_delay_init();
+
 	//////////////////////////////////////////////////////////////
 	// TaSSEL_2 - selects the SMCLK as the clock source
 	// MC_1     - selects the mode. UP Mode in this case
@@ -176,27 +194,5 @@ void _LP_time_delay_m( int m_delay)
 
 }
 
-////////////////////////////////////////////////////////////////////
-//// Timer A0 interrupt service routine
-//#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
-//__interrupt void Timer_A (void)
-//{
-//	//////////////////////////////////////////////////////////////
-//	// Clear interrupt flag
-//	TACTL &= ~TAIFG;
-//
-//	//////////////////////////////////////////////////////////////
-//	// Disable CCR0 interrupt
-//	CCTL0 &= ~CCTL0;
-//
-//	//////////////////////////////////////////////////////////////
-//	// Exit LPM0
-//	_BIC_SR(LPM0_EXIT);
-//
-//	//////////////////////////////////////////////////////////////
-//	// Disable global interrupts
-//	_DINT();
-//
-//}
 
 #endif /* MSP430_LIB_LPM_TIME_DELAY_H_ */

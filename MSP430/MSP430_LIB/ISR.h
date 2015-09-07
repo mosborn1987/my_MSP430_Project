@@ -133,5 +133,30 @@ __interrupt void Port_2(void)
 
 }
 
+/*****************************************************************
+*
+* FUNCTION:	Timer_A0
+*
+* PURPOSE:	Interrupt Handler to service the TimerA0 interrupt
+*
+* PARAMETERS:	none
+*
+*****************************************************************/
+#pragma vector =WDT_VECTOR
+__interrupt void WDT_Routine(void)
+{
+//	IFG1 = 0x00;
+}
+
+#pragma vector=RESET_VECTOR
+__interrupt void Reset_ISR(void)
+{
+	IFG1 = 0x00;
+//	main(0);
+	_BIC_SR(LPM0_EXIT);
+
+	_DINT();
+//	_bic_SR_register_on_exit(LPM3_bits);
+}
 
 #endif /* MSP430_LIB_ISR_H_ */
