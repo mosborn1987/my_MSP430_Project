@@ -39,6 +39,9 @@ void infinit_samples(void)
 #define GREEN P1_6
 #define RED1 P2_4
 #define RED2 P2_5
+#define LOW_BOUND 48
+#define HIGH_BOUND 52
+
 void LED_Sample(void)
 {
 	pinMODE(RED|GREEN, OUTPUT);
@@ -47,67 +50,75 @@ void LED_Sample(void)
 	pinMODE(RED1|RED2, OUTPUT);
 	digitalWrite(RED1|RED2, LOW);
 
-	init_Mx2125(P1_3, P1_4);
+//	init_Mx2125(P1_3, P1_4);
 	int x = 0;
 	int y = 0;
 
 	// UART Test
 	while(1)
 	{
-		init_Mx2125(P1_3, P1_4);
+
 		// Accerometer Test
-		x = sample_x();
+		x = read_PWM(P1_3);
 
 		// Sample y
-		y = sample_y();
-//		_DINT();
-//		x += 4;
-//		y += 3;
+		y = read_PWM(P1_4);
 
-		if( x>=54)
+		// FORWARD
+		if( x >= HIGH_BOUND)
 		{
 			digitalWrite(RED, HIGH);
 			digitalWrite(GREEN, LOW );
 		}
 
-		if(x<=46)
+		// BACKWARDS
+		if(x <= LOW_BOUND)
 		{
 			digitalWrite(RED, LOW);
 			digitalWrite(GREEN, HIGH );
 		}
 
-		if( (x<=53)&&(x>=47) )
+		// CENTER - X
+		if( (x < HIGH_BOUND)&&(x > LOW_BOUND) )
 		{
 			digitalWrite(RED, LOW);
 			digitalWrite(GREEN, LOW );
 		}
 
-
-		///////////////////
-		if( y>=54)
-		{
-			digitalWrite(RED1, HIGH);
-			digitalWrite(RED2, LOW );
-		}
-
-		if(y<=46)
+		// LEFT
+		if(y <= LOW_BOUND)
 		{
 			digitalWrite(RED1, LOW);
 			digitalWrite(RED2, HIGH );
 		}
 
-		if( (y<=51)&&(y>=49) )
+		// RIGHT
+		if( y >= HIGH_BOUND)
+		{
+			digitalWrite(RED1, HIGH);
+			digitalWrite(RED2, LOW );
+		}
+
+		// CENTER - Y
+		if( (y < HIGH_BOUND )&&(y > LOW_BOUND) )
 		{
 			digitalWrite(RED1, LOW);
 			digitalWrite(RED2, LOW );
 		}
 
-		///////////
+		// Send to uart
+		UART_init();
+		sprintf(buffer, " x = %d    ", x);
+		UARTSendArray(&buffer, strlen(buffer) );
+		sprintf(buffer, "y = %d\n\r", y);
+		UARTSendArray(&buffer, strlen(buffer));
 
+		// Time delay
 		_LP_time_delay_init();
+		_LP_time_delay_ms(500);
+
+//		_LP_time_delay_init();
 //		_LP_time_delay_ms(250);
-
-
 
 	}
 }

@@ -11,14 +11,14 @@
 #include <Mx2125.h>
 #include <my_Mx2125.h>
 
-	// UART Test
 
 void main(void)
 {
 	// Initialize
 	WDTCTL = WDTPW + WDTHOLD;     	// Stop WDT
 
-	infinit_samples();
+//	infinit_samples();
+	LED_Sample();
 
 
 }
