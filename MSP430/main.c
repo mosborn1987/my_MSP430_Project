@@ -40,31 +40,43 @@ void time_delay( unsigned int time_delay )
 //	_EINT();
 //	_BIS_SR(GIE);         			// Enable Interrupt
 
-	//////////////////////////////////////////////////////////////
-	// Enable CCR0 interrupt
-	CCTL0 = CCIE;
+	int i = 0;
+	for(i = 0; i < 10000; i++ )
+	{
+		//////////////////////////////////////////////////////////////
+		// Enable CCR0 interrupt
+		CCTL0 = CCIE;
 
-	TAR = 0;
+		TAR = 0;
 
-	//////////////////////////////////////////////////////////////
-	// Set the micro second time delay
-	CCR0 = time_delay;
+		//////////////////////////////////////////////////////////////
+		// Set the micro second time delay
+		CCR0 = time_delay;
 
-	//////////////////////////////////////////////////////////////
-	// Calibrates the DCO Clock to 1MHZ. The DCO clock is the
-	// clock signal source of the SMCLK
-	BCSCTL1 = CAL_BC1_1MHZ; //DIVA_3+;
+		//////////////////////////////////////////////////////////////
+		// Calibrates the DCO Clock to 1MHZ. The DCO clock is the
+		// clock signal source of the SMCLK
+		BCSCTL1 = CAL_BC1_1MHZ; //DIVA_3+;
 
-	//////////////////////////////////////////////////////////////
-	// TaSSEL_1 - selects the ACLK as the clock source
-	// MC_3     - selects the mode. UP/DOWN Mode in this case
-	// ID_3     - Input Signal divider. /8
-	TACTL = TASSEL_1 + MC_3 + ID_3;
+		//////////////////////////////////////////////////////////////
+		// TaSSEL_1 - selects the ACLK as the clock source
+		// MC_3     - selects the mode. UP/DOWN Mode in this case
+		// ID_3     - Input Signal divider. /8
+		TACTL = TASSEL_1 + MC_3 + ID_3;
 
-//	_EINT();
-	//////////////////////////////////////////////////////////////
-	// CPUOFF - Accomplishes the same results as LPM0
-	_BIS_SR(GIE);//LPM3_bits + GIE);
+		//	_EINT();
+		//////////////////////////////////////////////////////////////
+		// CPUOFF - Accomplishes the same results as LPM0
+//		_BIS_SR(GIE); // + LPM3_bits);//LPM3_bits + GIE);
+
+		// Enable interrupt
+		TACTL |= TAIE;
+		__bis_SR_register(LPM3_bits + GIE);
+
+	}
+
+	// Disable interrupt
+	TACTL &= ~TAIE;
 
 //	_DINT();
 	return;
@@ -89,6 +101,7 @@ __interrupt void Timer_A (void)
 	// Exit LPM0
 //	_BIC_SR_IRQ(LPM3_EXIT);
 
+//	_BIS_SR_IRQ(LPM3_bits);
 	//////////////////////////////////////////////////////////////
 	// Disable global interrupts
 	_DINT();
