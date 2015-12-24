@@ -38,39 +38,39 @@ extern int P2_GPIO_CHANNEL 	=	0x00;
 #define P2_ISR_PWM_READ			0x01
 
 
-////////////////////////////////////////////////////////////////////
-//// Timer A0 interrupt service routine
-//#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
-//__interrupt void Timer_A (void)
-//{
-//	// Used for LPM_timer_delays
-//	if( MODE_TIMER_A == TA_ISR_TIMER)
-//	{
-//		//////////////////////////////////////////////////////////////
-//		// Clear interrupt flag
-//		TACTL &= ~TAIFG;
-//
-//		//////////////////////////////////////////////////////////////
-//		// Disable CCR0 interrupt
-//		CCTL0 &= ~CCTL0;
-//
-//		//////////////////////////////////////////////////////////////
-//		// Exit LPM0
-//		_BIC_SR(LPM0_EXIT);
-//
-//		//////////////////////////////////////////////////////////////
-//		// Disable global interrupts
-//		_DINT();
-//	}
-//
-//	// This code will probably never be reached.
-//	// But just in case needed
-//	if( MODE_TIMER_A == TA_ISR_Mx2125)
-//	{
-//		TACTL &= ~TAIFG;
-//	}
-//
-//}
+//////////////////////////////////////////////////////////////////
+// Timer A0 interrupt service routine
+#pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
+__interrupt void Timer_A (void)
+{
+	// Used for LPM_timer_delays
+	if( MODE_TIMER_A == TA_ISR_TIMER)
+	{
+		//////////////////////////////////////////////////////////////
+		// Clear interrupt flag
+		TACTL &= ~TAIFG;
+
+		//////////////////////////////////////////////////////////////
+		// Disable CCR0 interrupt
+		CCTL0 &= ~CCTL0;
+
+		//////////////////////////////////////////////////////////////
+		// Exit LPM0
+		_BIC_SR(LPM0_EXIT);
+
+		//////////////////////////////////////////////////////////////
+		// Disable global interrupts
+		_DINT();
+	}
+
+	// This code will probably never be reached.
+	// But just in case needed
+	if( MODE_TIMER_A == TA_ISR_Mx2125)
+	{
+		TACTL &= ~TAIFG;
+	}
+
+}
 
 //////////////////////////////////////////////////////////////////v
 // Port 1 interrupt service routine

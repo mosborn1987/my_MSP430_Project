@@ -86,6 +86,8 @@ void digitalWrite( int GPIO, int Logic_Value);
 void Toggle_GPIO( int GPIO );
 void turn_ON( int GPIO );
 void turn_OFF( int GPIO);
+void turn_OFF_ALL(void);
+void turn_ON_ALL(void);
 
 
 //***********************************************************
@@ -180,6 +182,22 @@ void digitalWrite( int GPIO, int Logic_Value)
 	//*******************************************************
 	if((GPIO & PORT_MASK) == PORT_2)
 	{
+		//***************************************************
+		// Note: The default for P2.3 and 2.7 are Xin & Xout
+		// Set the pins to GPIO's.
+		//***************************************************
+//		// Set pin 2.6 to GPIO
+//		if((GPIO & PORT_MASK) == BIT6)
+//		{
+//			P2SEL &= ~(BIT6);
+//		}
+//
+//		// Set pin 2.7 to GPIO
+//		if((GPIO & PORT_MASK) == BIT7)
+//		{
+//			P2SEL &= ~(BIT7);
+//		}
+
 
 		//***************************************************
 		// Logic HIGH
@@ -326,6 +344,19 @@ void turn_OFF( int GPIO)
 	// Add PORTS as nedded
 	//*******************************************************
 
+}
+
+
+void turn_OFF_ALL(void)
+{
+	P1OUT = 0x00;
+	P2OUT = 0x00;
+}
+
+void turn_ON_ALL(void)
+{
+	P1OUT = 0xFF;
+	P2OUT = 0xFF;
 }
 
 #endif /* LIBRARY_GPIOS_H_ */

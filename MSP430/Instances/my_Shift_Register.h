@@ -27,6 +27,8 @@
 #define shift_register_count		8
 #define m_SCLK_PIN					P1_0
 #define m_SDA_PIN   	            P1_1
+#define ALL_ON						0xFF
+#define ALL_OFF						0x00
 
 
 ////////////////////////////////////////////////////////////////
@@ -44,21 +46,36 @@ void Set_Shift_Register( int data_to_send )
 }
 
 ////////////////////////////////////////////////////////////////
+// All On
+void All_ON()
+{
+	Set_Shift_Register(ALL_ON);
+}
+
+////////////////////////////////////////////////////////////////
+// All OFF
+void All_OFF()
+{
+	Set_Shift_Register(ALL_OFF);
+}
+////////////////////////////////////////////////////////////////
 // This is just for fun
 void Spin_infinitly( void )
 {
+	// Initialize the Shift Register.
+	init_my_SR();
 	while(1)
 	{
 		int j = 0;
 		int send_byte = 0x01;
 
-		for(j = 0; j<6; j++ )
+		for(j = 0; j<8; j++ )
 		{
 			Set_Shift_Register(send_byte);
-			_time_delay_ms(25);
+			_time_delay_ms(250);
 
 			Set_Shift_Register(send_byte);
-			_time_delay_ms(75);
+			_time_delay_ms(750);
 
 			send_byte = (send_byte << 1);
 		}

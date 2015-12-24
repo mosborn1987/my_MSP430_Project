@@ -19,7 +19,7 @@
 unsigned long T0          = 0x00;
 unsigned long T1          = 0x00;
 unsigned long T2          = 0x00;
-int           Duty_Cycle  = 0;
+int Duty_Cycle  		  = 0;
 
 
 //////////////////////////////////////////////////////////////////

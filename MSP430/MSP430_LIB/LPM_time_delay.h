@@ -152,7 +152,7 @@ void _LP_time_delay_s( int s_delay)
 
 			//////////////////////////////////////////////////////
 			// CPUOFF - Accomplishes the same results as LPM0
-			_BIS_SR(GIE + CPUOFF);// + GIE);
+			_BIS_SR(GIE + CPUOFF);
 		}
 
 		//////////////////////////////////////////////////////////
