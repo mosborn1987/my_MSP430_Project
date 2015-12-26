@@ -18,36 +18,36 @@
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - Timer A
-extern int  MODE_TIMER_A    = 	0x00;
-#define     TA_ISR_DEFUALT		0x00
-#define     TA_ISR_TIMER 		0x01
-#define     TA_ISR_Mx2125 		0x02
-#define     TA_ISR_PWM			0x03
+extern int  MODE_TIMER_A    = 	     0x00;
+#define     TA_ISR_DEFUALT		     0x00
+#define     TA_ISR_TIMER 		     0x01
+#define     TA_ISR_Mx2125 		     0x02
+#define     TA_ISR_PWM			     0x03
 
 //////////////////////////////////////////////////////////////////
 // Timer A - PWM
-extern int  PWM_PERIOD      =   0x00;
-extern int  PWM_DUTY_CYCLE  =   0x00;
-extern int  PWM_DUTY_ON     =   0x00;
-extern int  PWM_DUTY_OFF    =   0x00;
-extern int  m_PORT_1        =   0;
-extern int  m_PORT_2        =   0;
+extern int  PWM_PERIOD           =   0x00;
+extern int  PWM_DUTY_CYCLE       =   0x00;
+extern int  PWM_DUTY_ON_CYCLES   =   0x00;
+extern int  PWM_DUTY_OFF_CYCLES  =   0x00;
+extern int  m_PORT_1_PWM         =   0;
+extern int  m_PORT_2_PWM         =   0;
+#define     DONT_USE                 0
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - PORT 1
-extern int PORT_1_MODE 		= 	0x00;
-extern int P1_GPIO_CHANNEL  = 	0x00;
-#define    P1_ISR_DEFAULT		0x00;
-#define    P1_ISR_PWM_READ		0x01
+extern int  PORT_1_MODE 		 = 	 0x00;
+extern int  P1_GPIO_CHANNEL      = 	 0x00;
+#define     P1_ISR_DEFAULT	     	 0x00;
+#define     P1_ISR_PWM_READ	     	 0x01
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - PORT 1
-extern int PORT_2_MODE 		=	0x00;
-extern int P2_GPIO_CHANNEL 	=	0x00;
-#define    P2_ISR_DEFAULT		0x00;
-#define    P2_ISR_PWM_READ		0x01
+extern int  PORT_2_MODE 		 =	 0x00;
+extern int  P2_GPIO_CHANNEL 	 =	 0x00;
+#define     P2_ISR_DEFAULT	     	 0x00;
+#define     P2_ISR_PWM_READ	     	 0x01
 
-#define PIN BIT0
 //////////////////////////////////////////////////////////////////
 // Timer A0 interrupt service routine
 #pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
@@ -84,12 +84,6 @@ __interrupt void Timer_A (void)
 
 	}
 
-	extern int  PWM_PERIOD      =   0x00;
-	extern int  PWM_DUTY_CYCLE  =   0x00;
-	extern int  PWM_DUTY_ON     =   0x00;
-	extern int  PWM_DUTY_OFF    =   0x00;
-	extern int  m_PORT_1        =   0;
-	extern int  m_PORT_2        =   0;
 
 	//////////////////////////////////////////////////////////////
 	// TA_ISR_PWM
@@ -100,24 +94,33 @@ __interrupt void Timer_A (void)
 
 		//////////////////////////////////////////////////////////
 		// Toggle output
-		P1OUT ^= PIN;
+		if(m_PORT_1_PWM & GPIO_MASK)
+		{
+			Toggle_GPIO(m_PORT_1_PWM);
+		}
+
+		if(m_PORT_2_PWM & GPIO_MASK)
+		{
+			Toggle_GPIO(m_PORT_2_PWM);
+		}
+
 
 		//////////////////////////////////////////////////////////
-		// If P1_0 is now 'high'.
-		if(P1OUT & PIN)
+		// If PWM Pin is 'HIGH'
+		if( (P1OUT & (m_PORT_1_PWM & GPIO_MASK)) | (P2OUT & (m_PORT_2_PWM & GPIO_MASK)) )
 		{
 			//////////////////////////////////////////////////////
 			// Add the 'ON' duty cycles to the count
-			CCR0 += PWM_DUTY_ON;
+			CCR0 += PWM_DUTY_ON_CYCLES;
 		}
 
 		//////////////////////////////////////////////////////////
-		// If P1_0 is now 'LOW'
+		// If PWM Pin is 'LOW'
 		else
 		{
 			//////////////////////////////////////////////////////
 			//Add the 'OFF' duty cycles to the count
-			TA0CCR0 += PWM_DUTY_OFF;
+			TA0CCR0 += PWM_DUTY_OFF_CYCLES;
 		}
 
 	}

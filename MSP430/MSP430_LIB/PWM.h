@@ -37,31 +37,92 @@ void init_TA(void);
 void init_members(int GPIO);
 int take_sample(void);
 
-void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD);
-void write_PWM_init_PORTS(int GPIO);
-extern int  PWM_PERIOD      =   0x00;
-extern int  PWM_DUTY_CYCLE  =   0x00;
-extern int  PWM_DUTY_ON     =   0x00;
-extern int  PWM_DUTY_OFF    =   0x00;
-extern int  m_PORT_1        =   0;
-extern int  m_PORT_2        =   0;
+//////////////////////////////////////////////////////////////////
+// Write PWM Prototypes
+void write_PWM_Execute(void);
+//////////////////////////////////////////////////////////////////
+// Supporting Functions
+void write_PWM_init_SET_CYCLES(int m_DUTY_CYCLE, int m_PERIOD);
+void write_PWM_init_PORTS(int m_PORT_1, int m_PORT_2);
+void write_PWM_init_PORT(int m_GPIO);
+void write_PWM_init_ISR(int GPIO);
 
 
-void write_PWM_init_PORTS(int GPIO)
+// Set the ISR members
+void write_PWM_init_SET_CYCLES(int m_DUTY_CYCLE, int m_PERIOD)
 {
-	// Set member PORT 1 or 2
-	if(GPIO)
+	// Set the ISR DUTY_ON
+	PWM_DUTY_ON_CYCLES  = (m_DUTY_CYCLE*m_PERIOD)/100;
+
+	// Calculate and Set OFF Cycles
+	PWM_DUTY_OFF_CYCLES = (m_PERIOD - PWM_DUTY_ON_CYCLES);
+
 }
+
+
+void write_PWM_init_PORT(int m_GPIO)
+{
+	// Test to see if port is in use.
+	if(m_GPIO & GPIO_MASK)
+	{
+		// Clear the output
+		digitalWrite( m_GPIO, LOW);
+
+		// Set Direction to Output
+		pinMODE(m_GPIO, OUTPUT);
+
+		// Set ISR member variable
+		write_PWM_init_ISR(m_GPIO);
+
+	}
+
+	else
+	{
+		// If port is not in use
+		write_PWM_init_ISR(m_GPIO);
+
+	}
+
+
+}
+
+void write_PWM_init_PORTS(int m_PORT_1, int m_PORT_2)
+{
+	// Port 1
+	write_PWM_init_PORT(m_PORT_1|PORT_1);
+
+	// Port 2
+	write_PWM_init_PORT(m_PORT_2|PORT_2);
+
+}
+
+
+//////////////////////////////////////////////////////////////////
+// This function sets the variable of the ISR
+void write_PWM_init_ISR(int GPIO)
+{
+	// Port 1
+	if(GPIO & PORT_1)
+	{
+		m_PORT_1_PWM = GPIO;
+	}
+
+	// Port 2
+	if(GPIO & PORT_2)
+	{
+		m_PORT_2_PWM = GPIO;
+	}
+
+}
+
 //////////////////////////////////////////////////////////////////
 // This function allows you to set the GPIO, the pulse width
 // modulation duty cycle and the period.
-void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD)
+void write_PWM_Execute(void)
 {
 	//////////////////////////////////////////////////////////////
-	// Clear GPIO Outputs
-	// Work on the PWM Software here
-	P1OUT &= ~PIN;			// Clear output
-	P1DIR |= PIN;			// Output direction
+	// Note: write_PWM_init_PORT should already be called
+
 
 	// Set up the Service routine Switch Value
 	MODE_TIMER_A = TA_ISR_PWM;
@@ -70,16 +131,6 @@ void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD)
 	// Calibrates the DCO Clock to 1MHZ. The DCO clock is the
 	// clock signal source of the SMCLK.
 	DCOCTL = CALDCO_1MHZ;
-
-
-	//////////////////////////////////////////////////////////////
-	// Set/Calculate the PWM Varialbe
-	PWM_PERIOD   =       500;
-	PWM_DUTY_CYCLE = 10;
-
-	// Calculate
-	PWM_DUTY_ON  = (PWM_DUTY_CYCLE*PWM_PERIOD)/100;
-	PWM_DUTY_OFF = (PWM_PERIOD-PWM_DUTY_ON);
 
 	//////////////////////////////////////////////////////////////
 	// TaSSEL_2 - selects the SMCLK as the clock source
@@ -99,7 +150,7 @@ void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD)
 	// Set CCR0
 	// Note that CCR0 = TACCR0 by definition
 	// and TACCR0 = TA0CCR0
-	CCR0 = PWM_DUTY_ON;
+	CCR0 = PWM_DUTY_ON_CYCLES;
 
 //	P1OUT |= BIT0;	// Turn on that bit
 

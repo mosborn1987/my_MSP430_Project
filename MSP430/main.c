@@ -13,6 +13,7 @@
 #include <my_Nokia_5110.h>
 #include <my_Christmas_Tree.h>
 #include <Light_House.h>
+#include <PWM.h>
 
 #define PIN BIT0
 
@@ -21,6 +22,13 @@ void main(void)
 	// Initialize
 	WDTCTL = WDTPW + WDTHOLD;     	// Stop WDT
 
+	// Initiate PWM Cycles
+	write_PWM_init_SET_CYCLES(10, 500);
+
+	// Initiate PWM Ports
+	write_PWM_init_PORTS( P1_0, DONT_USE);
+
+	write_PWM_Execute();
 
 
 }
