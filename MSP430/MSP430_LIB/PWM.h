@@ -161,7 +161,6 @@ void write_PWM_Execute(void)
 		_BIS_SR(GIE + CPUOFF);
 	}
 
-
 }
 
 

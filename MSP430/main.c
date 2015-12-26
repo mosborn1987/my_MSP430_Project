@@ -23,7 +23,7 @@ void main(void)
 	WDTCTL = WDTPW + WDTHOLD;     	// Stop WDT
 
 	// Initiate PWM Cycles
-	write_PWM_init_SET_CYCLES(10, 500);
+	write_PWM_init_SET_CYCLES(50, 500);
 
 	// Initiate PWM Ports
 	write_PWM_init_PORTS( P1_0, DONT_USE);
