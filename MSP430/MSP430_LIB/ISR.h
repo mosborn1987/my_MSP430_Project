@@ -18,29 +18,34 @@
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - Timer A
-extern int MODE_TIMER_A = 		0x00;
-#define TA_ISR_DEFUALT			0x00
-#define TA_ISR_TIMER 			0x01
-#define TA_ISR_Mx2125 			0x02
-#define TA_ISR_PWM				0x03
-extern int PWM_PERIOD   =       0x00;
-extern int PWM_DUTY_CYCLE =     0x00;
-extern int PWM_DUTY_ON  =       0x00;
-extern int PWM_DUTY_OFF =       0x00;
+extern int  MODE_TIMER_A    = 	0x00;
+#define     TA_ISR_DEFUALT		0x00
+#define     TA_ISR_TIMER 		0x01
+#define     TA_ISR_Mx2125 		0x02
+#define     TA_ISR_PWM			0x03
+
+//////////////////////////////////////////////////////////////////
+// Timer A - PWM
+extern int  PWM_PERIOD      =   0x00;
+extern int  PWM_DUTY_CYCLE  =   0x00;
+extern int  PWM_DUTY_ON     =   0x00;
+extern int  PWM_DUTY_OFF    =   0x00;
+extern int  m_PORT_1        =   0;
+extern int  m_PORT_2        =   0;
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - PORT 1
 extern int PORT_1_MODE 		= 	0x00;
-extern int P1_GPIO_CHANNEL = 	0x00;
-#define P1_ISR_DEFAULT			0x00;
-#define P1_ISR_PWM_READ			0x01
+extern int P1_GPIO_CHANNEL  = 	0x00;
+#define    P1_ISR_DEFAULT		0x00;
+#define    P1_ISR_PWM_READ		0x01
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - PORT 1
 extern int PORT_2_MODE 		=	0x00;
 extern int P2_GPIO_CHANNEL 	=	0x00;
-#define P2_ISR_DEFAULT			0x00;
-#define P2_ISR_PWM_READ			0x01
+#define    P2_ISR_DEFAULT		0x00;
+#define    P2_ISR_PWM_READ		0x01
 
 #define PIN BIT0
 //////////////////////////////////////////////////////////////////
@@ -51,52 +56,69 @@ __interrupt void Timer_A (void)
 	// Used for LPM_timer_delays
 	if( MODE_TIMER_A == TA_ISR_TIMER)
 	{
-		//////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////
 		// Clear interrupt flag
 		TACTL &= ~TAIFG;
 
-		//////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////
 		// Disable CCR0 interrupt
 		CCTL0 &= ~CCTL0;
 
-		//////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////
 		// Exit LPM0
 		_BIC_SR(LPM0_EXIT);
 
-		//////////////////////////////////////////////////////////////
+		//////////////////////////////////////////////////////////
 		// Disable global interrupts
 		_DINT();
 	}
 
+	//////////////////////////////////////////////////////////////
 	// This code will probably never be reached.
 	// But just in case needed
 	if( MODE_TIMER_A == TA_ISR_Mx2125)
 	{
+		//////////////////////////////////////////////////////////
+		// Not sure why I did this lol.
 		TACTL &= ~TAIFG;
+
 	}
 
+	extern int  PWM_PERIOD      =   0x00;
+	extern int  PWM_DUTY_CYCLE  =   0x00;
+	extern int  PWM_DUTY_ON     =   0x00;
+	extern int  PWM_DUTY_OFF    =   0x00;
+	extern int  m_PORT_1        =   0;
+	extern int  m_PORT_2        =   0;
+
+	//////////////////////////////////////////////////////////////
 	// TA_ISR_PWM
 	if( MODE_TIMER_A == TA_ISR_PWM)
 	{
+		//////////////////////////////////////////////////////////
 		// Have the clock setting already initialized
 
+		//////////////////////////////////////////////////////////
 		// Toggle output
 		P1OUT ^= PIN;
 
+		//////////////////////////////////////////////////////////
 		// If P1_0 is now 'high'.
 		if(P1OUT & PIN)
 		{
-//			CCR0 += 100;
+			//////////////////////////////////////////////////////
+			// Add the 'ON' duty cycles to the count
 			CCR0 += PWM_DUTY_ON;
 		}
 
+		//////////////////////////////////////////////////////////
 		// If P1_0 is now 'LOW'
 		else
 		{
-//			CCR0 += 500;
+			//////////////////////////////////////////////////////
+			//Add the 'OFF' duty cycles to the count
 			TA0CCR0 += PWM_DUTY_OFF;
 		}
-
 
 	}
 

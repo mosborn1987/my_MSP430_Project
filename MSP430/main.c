@@ -21,56 +21,7 @@ void main(void)
 	// Initialize
 	WDTCTL = WDTPW + WDTHOLD;     	// Stop WDT
 
-	// Work on the PWM Software here
-	P1OUT &= ~PIN;			// Clear output
-	P1DIR |= PIN;			// Output direction
 
-	// Set up the Service routine Switch Value
-	MODE_TIMER_A = TA_ISR_PWM;
-
-	//////////////////////////////////////////////////////////////
-	// Calibrates the DCO Clock to 1MHZ. The DCO clock is the
-	// clock signal source of the SMCLK.
-	DCOCTL = CALDCO_1MHZ;
-
-
-	//////////////////////////////////////////////////////////////
-	// Set/Calculate the PWM Varialbe
-	PWM_PERIOD   =       500;
-	PWM_DUTY_CYCLE = 10;
-
-	// Calculate
-	PWM_DUTY_ON  = (PWM_DUTY_CYCLE*PWM_PERIOD)/100;
-	PWM_DUTY_OFF = (PWM_PERIOD-PWM_DUTY_ON);
-
-	//////////////////////////////////////////////////////////////
-	// TaSSEL_2 - selects the SMCLK as the clock source
-	// MC_1     - selects the mode. UP Mode in this case
-	// MC_2     - Continuouse Count Mode
-	// ID_0     - Input Signal divider. Divides the SMCLK signal
-	// TACLR	- Clear Clock
-	// TACTL = TA0CTL by definition
-	TACTL = TASSEL_2 + MC_2 + TACLR; // + ID_0 + TACLR;
-
-	//////////////////////////////////////////////////////////////
-	// Enable CCR0 interrupt
-	// NOte CCTL0 = TACCTL0
-	CCTL0 = CCIE;
-
-	//////////////////////////////////////////////////////////////
-	// Set CCR0
-	// Note that CCR0 = TACCR0 by definition
-	// and TACCR0 = TA0CCR0
-	CCR0 = PWM_DUTY_ON;
-
-//	P1OUT |= BIT0;	// Turn on that bit
-
-	//////////////////////////////////////////////////////////////
-	// CPUOFF - Accomplishes the same results as LPM0
-	while(1)
-	{
-		_BIS_SR(GIE + CPUOFF);
-	}
 
 }
 

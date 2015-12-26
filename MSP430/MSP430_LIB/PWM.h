@@ -31,13 +31,87 @@ int m_GPIO_PORT = 0;
 //////////////////////////////////////////////////////////////////
 // List of prototypes
 int read_PWM(int GPIO);
-void init_PWM(int GPIO);
+void read_PWM_init(int GPIO);
 void init_PORT_ISR(int GPIO);
 void init_TA(void);
 void init_members(int GPIO);
 int take_sample(void);
 
 void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD);
+void write_PWM_init_PORTS(int GPIO);
+extern int  PWM_PERIOD      =   0x00;
+extern int  PWM_DUTY_CYCLE  =   0x00;
+extern int  PWM_DUTY_ON     =   0x00;
+extern int  PWM_DUTY_OFF    =   0x00;
+extern int  m_PORT_1        =   0;
+extern int  m_PORT_2        =   0;
+
+
+void write_PWM_init_PORTS(int GPIO)
+{
+	// Set member PORT 1 or 2
+	if(GPIO)
+}
+//////////////////////////////////////////////////////////////////
+// This function allows you to set the GPIO, the pulse width
+// modulation duty cycle and the period.
+void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD)
+{
+	//////////////////////////////////////////////////////////////
+	// Clear GPIO Outputs
+	// Work on the PWM Software here
+	P1OUT &= ~PIN;			// Clear output
+	P1DIR |= PIN;			// Output direction
+
+	// Set up the Service routine Switch Value
+	MODE_TIMER_A = TA_ISR_PWM;
+
+	//////////////////////////////////////////////////////////////
+	// Calibrates the DCO Clock to 1MHZ. The DCO clock is the
+	// clock signal source of the SMCLK.
+	DCOCTL = CALDCO_1MHZ;
+
+
+	//////////////////////////////////////////////////////////////
+	// Set/Calculate the PWM Varialbe
+	PWM_PERIOD   =       500;
+	PWM_DUTY_CYCLE = 10;
+
+	// Calculate
+	PWM_DUTY_ON  = (PWM_DUTY_CYCLE*PWM_PERIOD)/100;
+	PWM_DUTY_OFF = (PWM_PERIOD-PWM_DUTY_ON);
+
+	//////////////////////////////////////////////////////////////
+	// TaSSEL_2 - selects the SMCLK as the clock source
+	// MC_1     - selects the mode. UP Mode in this case
+	// MC_2     - Continuouse Count Mode
+	// ID_0     - Input Signal divider. Divides the SMCLK signal
+	// TACLR	- Clear Clock
+	// TACTL = TA0CTL by definition
+	TACTL = TASSEL_2 + MC_2 + TACLR; // + ID_0 + TACLR;
+
+	//////////////////////////////////////////////////////////////
+	// Enable CCR0 interrupt
+	// NOte CCTL0 = TACCTL0
+	CCTL0 = CCIE;
+
+	//////////////////////////////////////////////////////////////
+	// Set CCR0
+	// Note that CCR0 = TACCR0 by definition
+	// and TACCR0 = TA0CCR0
+	CCR0 = PWM_DUTY_ON;
+
+//	P1OUT |= BIT0;	// Turn on that bit
+
+	//////////////////////////////////////////////////////////////
+	// CPUOFF - Accomplishes the same results as LPM0
+	while(1)
+	{
+		_BIS_SR(GIE + CPUOFF);
+	}
+
+
+}
 
 
 //////////////////////////////////////////////////////////////////
@@ -45,7 +119,7 @@ void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD);
 int read_PWM(int GPIO)
 {
 	// initialize
-	init_PWM(GPIO);
+	read_PWM_init(GPIO);
 
 	// Take Reading
 	return take_sample();
@@ -53,17 +127,8 @@ int read_PWM(int GPIO)
 }
 
 //////////////////////////////////////////////////////////////////
-// This function allows you to set the GPIO, the pulse width
-// modulation duty cycle and the period.
-void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD)
-{
-
-
-}
-
-//////////////////////////////////////////////////////////////////
 // Initialize Ports - Select which pin is used for x and y
-void init_PWM(int GPIO)
+void read_PWM_init(int GPIO)
 {
 	init_TA();
 	init_members(GPIO);

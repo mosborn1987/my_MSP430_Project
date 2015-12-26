@@ -39,7 +39,7 @@
 /************************************************************
 * PORT 3 Definitions
 ************************************************************/
-#define PORT_3					(2 << 8)
+#define PORT_3					(3 << 8)
 #define P3_0                    ( PORT_3 | BIT0 )
 #define P3_1                    ( PORT_3 | BIT1 )
 #define P3_2                    ( PORT_3 | BIT2 )
@@ -79,9 +79,9 @@
 #define INPUT					false
 
 //***********************************************************
-// Function prototypes
+// Basic Function prototypes
 //***********************************************************/
-void pinMODE(int GPIO, int I_O_Value);
+void pinMODE(int GPIO, int I_O_MODE);
 void digitalWrite( int GPIO, int Logic_Value);
 void Toggle_GPIO( int GPIO );
 void turn_ON( int GPIO );
@@ -89,12 +89,27 @@ void turn_OFF( int GPIO);
 void turn_OFF_ALL(void);
 void turn_ON_ALL(void);
 
+//***********************************************************
+// Advanced Function prototypes
+//***********************************************************/
+void power_ON(int GPIO);
+void power_OFF(int GPIO);
+void power_ON_ALL(void);
+void power_OFF_ALL(void);
+void power_RESTORE(void);
+
+
+
+//***********************************************************
+// Basic Function prototypes
+//***********************************************************/
+
 
 //***********************************************************
 // pinMODE - This function will set the I/O State of a given
 // 			GPIO.
 //***********************************************************/
-void pinMODE(int GPIO, int I_O_Value)
+void pinMODE(int GPIO, int I_O_MODE)
 {
 
 	//*******************************************************
@@ -106,13 +121,13 @@ void pinMODE(int GPIO, int I_O_Value)
 		//***************************************************
 		// OUTPUT Direction
 		//***************************************************
-		if(I_O_Value == OUTPUT)
+		if(I_O_MODE == OUTPUT)
 			P1DIR |= (GPIO & GPIO_MASK);
 
 		//***************************************************
 		// INPUT Direction
 		//***************************************************
-		if (I_O_Value == INPUT)
+		if (I_O_MODE == INPUT)
 			P1DIR &= ~(GPIO & GPIO_MASK);
 
 	}
@@ -127,13 +142,13 @@ void pinMODE(int GPIO, int I_O_Value)
 		//***************************************************
 		// OUTPUT Direction
 		//***************************************************
-		if(I_O_Value == OUTPUT)
+		if(I_O_MODE == OUTPUT)
 			P2DIR |= (GPIO & GPIO_MASK);
 
 		//***************************************************
 		// INPUT Direction
 		//***************************************************
-		if (I_O_Value == INPUT)
+		if (I_O_MODE == INPUT)
 			P2DIR &= ~(GPIO & GPIO_MASK);
 
 	}
@@ -347,16 +362,73 @@ void turn_OFF( int GPIO)
 }
 
 
+//***********************************************************
+//
+//***********************************************************/
 void turn_OFF_ALL(void)
 {
+	//*******************************************************
+	// Sets Output to OFF
+	//*******************************************************
 	P1OUT = 0x00;
 	P2OUT = 0x00;
+
+	//*******************************************************
+	// Add PORTS as nedded
+	//*******************************************************
+
 }
 
+//***********************************************************
+//
+//***********************************************************/
 void turn_ON_ALL(void)
 {
+	//*******************************************************
+	// Sets Output to ON
+	//*******************************************************
 	P1OUT = 0xFF;
 	P2OUT = 0xFF;
+
 }
+
+
+//***********************************************************
+// Advanced Function prototypes
+//***********************************************************/
+
+//***********************************************************
+// power_ON: This function will initialize the GPIO and also
+//           turn it on.
+//***********************************************************/
+void power_ON(int GPIO)
+{
+
+}
+
+//***********************************************************
+// power_OFF: Set the direction of GPIO to input. This
+//            will conserve power drain. See msp430g2553
+//            data-sheet for more info.
+//***********************************************************/
+void power_OFF(int GPIO);
+
+//***********************************************************
+// power_ON_ALL: This function will initialize all GPIOs
+//               and turn them all ON.
+//***********************************************************/
+void power_ON_ALL(void);
+
+//***********************************************************
+// power_OFF_ALL : This function will save the current
+//                 settings and turn off all GPIOs.
+//***********************************************************/
+void power_OFF_ALL(void);
+
+//***********************************************************
+// power_RESTORE: This function will take the settings saved
+//                by power_OFF_ALL and turn on the GPIOs
+//***********************************************************/
+void power_RESTORE(void);
 
 #endif /* LIBRARY_GPIOS_H_ */
