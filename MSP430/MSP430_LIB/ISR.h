@@ -22,6 +22,11 @@ extern int MODE_TIMER_A = 		0x00;
 #define TA_ISR_DEFUALT			0x00
 #define TA_ISR_TIMER 			0x01
 #define TA_ISR_Mx2125 			0x02
+#define TA_ISR_PWM				0x03
+extern int PWM_PERIOD   =       0x00;
+extern int PWM_DUTY_CYCLE =     0x00;
+extern int PWM_DUTY_ON  =       0x00;
+extern int PWM_DUTY_OFF =       0x00;
 
 //////////////////////////////////////////////////////////////////
 // Interrupt Vector - PORT 1
@@ -37,7 +42,7 @@ extern int P2_GPIO_CHANNEL 	=	0x00;
 #define P2_ISR_DEFAULT			0x00;
 #define P2_ISR_PWM_READ			0x01
 
-
+#define PIN BIT0
 //////////////////////////////////////////////////////////////////
 // Timer A0 interrupt service routine
 #pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
@@ -68,6 +73,31 @@ __interrupt void Timer_A (void)
 	if( MODE_TIMER_A == TA_ISR_Mx2125)
 	{
 		TACTL &= ~TAIFG;
+	}
+
+	// TA_ISR_PWM
+	if( MODE_TIMER_A == TA_ISR_PWM)
+	{
+		// Have the clock setting already initialized
+
+		// Toggle output
+		P1OUT ^= PIN;
+
+		// If P1_0 is now 'high'.
+		if(P1OUT & PIN)
+		{
+//			CCR0 += 100;
+			CCR0 += PWM_DUTY_ON;
+		}
+
+		// If P1_0 is now 'LOW'
+		else
+		{
+//			CCR0 += 500;
+			TA0CCR0 += PWM_DUTY_OFF;
+		}
+
+
 	}
 
 }

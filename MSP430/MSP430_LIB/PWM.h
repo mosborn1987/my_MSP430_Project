@@ -37,9 +37,11 @@ void init_TA(void);
 void init_members(int GPIO);
 int take_sample(void);
 
+void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD);
+
 
 //////////////////////////////////////////////////////////////////
-// Take sample
+// Read and return the duty cycle of a PWM.
 int read_PWM(int GPIO)
 {
 	// initialize
@@ -50,6 +52,14 @@ int read_PWM(int GPIO)
 
 }
 
+//////////////////////////////////////////////////////////////////
+// This function allows you to set the GPIO, the pulse width
+// modulation duty cycle and the period.
+void write_PWM(int GPIO, int DUTY_CYCLE, int PERIOD)
+{
+
+
+}
 
 //////////////////////////////////////////////////////////////////
 // Initialize Ports - Select which pin is used for x and y
@@ -132,7 +142,9 @@ int take_sample(void)
 	if( m_GPIO_PORT == PORT_1)
 	{
 		////////////////////////////////////////////////////////////////////////////////
-		// This line of code will toss the first sample
+		// This line of code will toss the first sample. This insures that the sample
+		// begins at the beginings on the start of the period.
+		// I would suggest using the TACTL = TACLR; to clear the Counter
 		while( (P1IES & m_GPIO_bit))
 		{}
 

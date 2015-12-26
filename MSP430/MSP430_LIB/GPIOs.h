@@ -321,8 +321,8 @@ void turn_OFF( int GPIO)
 		//***************************************************
 		// Set GPIO DIRECTION and INPUT
 		//***************************************************
-		P1DIR |= (GPIO & GPIO_MASK);
-		P1OUT |= (GPIO & GPIO_MASK);
+		P1DIR &= ~(GPIO & GPIO_MASK);
+		P1OUT &= ~(GPIO & GPIO_MASK);
 
 	}
 
@@ -335,8 +335,8 @@ void turn_OFF( int GPIO)
 		//***************************************************
 		// Set GPIO DIRECTION and INPUT
 		//***************************************************
-		P2DIR |= (GPIO & GPIO_MASK);
-		P2OUT |= (GPIO & GPIO_MASK);
+		P2DIR &= ~(GPIO & GPIO_MASK);
+		P2OUT &= ~(GPIO & GPIO_MASK);
 
 	}
 
