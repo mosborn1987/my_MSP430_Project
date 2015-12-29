@@ -45,7 +45,7 @@ void main(void)
   	BCSCTL1 = CALBC1_1MHZ;      // Set DCO
   	DCOCTL  = CALDCO_1MHZ;
 
-  	Program_Example();
+  	main_Program();
 
 }
 

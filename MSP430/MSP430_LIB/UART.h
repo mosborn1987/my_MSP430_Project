@@ -224,6 +224,30 @@ void Print_String(const char *my_Char)
 
 }
 
+void Print_String_Enter(const char *my_Char)
+{
+	///////////////////////////////////////////////////////////////////
+	// Format buffer with string
+	sprintf( UART_buffer, my_Char);
+
+	// Send formatted buffer to UART
+	UARTSendArray(&UART_buffer, strlen(UART_buffer));
+
+	// Add a '\n\r' to the end of a line
+	UART_Enter();
+
+}
+
+void UART_Enter(void)
+{
+	///////////////////////////////////////////////////////////////////
+	// Format buffer with string
+	sprintf( UART_buffer, "\n\r");
+
+	// Send formatted buffer to UART
+	UARTSendArray(&UART_buffer, strlen(UART_buffer));
+}
+
 #define bell_sound 7
 
 void System_Bell(void)
