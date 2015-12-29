@@ -51,6 +51,8 @@ void write_PWM_init_ISR(int GPIO);
 // Set the ISR members
 void write_PWM_init_SET_CYCLES(int m_DUTY_CYCLE, int m_PERIOD)
 {
+//	ISR_write_PWM_init_SET_CYCLES(m_DUTY_CYCLE, m_PERIOD);
+
 	// Set the ISR DUTY_ON
 	PWM_DUTY_ON_CYCLES  = (m_DUTY_CYCLE*m_PERIOD)/100;
 
@@ -139,7 +141,7 @@ void write_PWM_Execute(void)
 	// ID_0     - Input Signal divider. Divides the SMCLK signal
 	// TACLR	- Clear Clock
 	// TACTL = TA0CTL by definition
-	TACTL = TASSEL_2 + MC_2 + TACLR; // + ID_0 + TACLR;
+	TACTL = TASSEL_2 + MC_1 + TACLR; // + ID_0 + TACLR;
 
 	//////////////////////////////////////////////////////////////
 	// Enable CCR0 interrupt

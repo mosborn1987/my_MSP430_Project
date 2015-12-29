@@ -14,24 +14,90 @@
 #include <my_Christmas_Tree.h>
 #include <Light_House.h>
 #include <PWM.h>
+#include <SPI.h>
+
+#include <RODRIGO.h>
 
 #define PIN BIT0
+
+
+/**
+ * Command to send for requesting to read a register from the NRF
+ */
+#define NRF_CMD_RREG		0b00000000
+
+/**
+ * Command to send when only reading a result from the NRF
+ */
+#define NRF_CMD_NOP			0b11111111
+
+/**
+ * Address of the configuration register of the NRF
+ */
+#define NRF_REG_CONFIG		0x00
+
 
 void main(void)
 {
 	// Initialize
 	WDTCTL = WDTPW + WDTHOLD;     	// Stop WDT
 
-	// Initiate PWM Cycles
-	write_PWM_init_SET_CYCLES(50, 500);
+  	BCSCTL1 = CALBC1_1MHZ;      // Set DCO
+  	DCOCTL  = CALDCO_1MHZ;
 
-	// Initiate PWM Ports
-	write_PWM_init_PORTS( P1_0, DONT_USE);
-
-	write_PWM_Execute();
-
+  	Program_Example();
 
 }
+
+//  	unsigned char my_char = 'A';
+//	unsigned char stat;
+//	unsigned char conf;
+//
+//	// SPI
+//	spi_init();
+//	UART_init();
+//	UART_Test();
+//
+//
+//  	while(1)
+//  	{
+//  		spi_csl();
+//		// send command
+//		stat = spi_xfer_byte(NRF_CMD_RREG | NRF_REG_CONFIG);
+//
+//		if(stat >= 0x001)
+//		{
+//			// print greater than
+//			UART_GREATER();
+//		}
+//		else
+//		{
+//			UART_LESS();
+//		}
+//
+//		// read response
+//		conf = spi_xfer_byte(NRF_CMD_NOP);
+//
+////		_LP_time_delay_s(1);
+//		spi_csh();
+//
+//  	}
+//
+//
+//}
+
+
+
+//	// Initiate PWM Cycles
+//	write_PWM_init_SET_CYCLES(75, 50);
+//
+//	// Initiate PWM Ports
+//	write_PWM_init_PORTS( P1_0, DONT_USE);
+//
+//	write_PWM_Execute();
+//
+//
+//}
 
 //	init_CT();
 //	CT_Demo();

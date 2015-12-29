@@ -28,8 +28,8 @@ extern int  MODE_TIMER_A    = 	     0x00;
 // Timer A - PWM
 extern int  PWM_PERIOD           =   0x00;
 extern int  PWM_DUTY_CYCLE       =   0x00;
-extern int  PWM_DUTY_ON_CYCLES   =   0x00;
-extern int  PWM_DUTY_OFF_CYCLES  =   0x00;
+static int  PWM_DUTY_ON_CYCLES   =   0x00;
+static int  PWM_DUTY_OFF_CYCLES  =   0x00;
 extern int  m_PORT_1_PWM         =   0;
 extern int  m_PORT_2_PWM         =   0;
 #define     DONT_USE                 0
@@ -48,6 +48,15 @@ extern int  P2_GPIO_CHANNEL 	 =	 0x00;
 #define     P2_ISR_DEFAULT	     	 0x00;
 #define     P2_ISR_PWM_READ	     	 0x01
 
+void ISR_write_PWM_init_SET_CYCLES(int m_ISR_DUTY_CYCLE, int m_ISR_PERIOD)
+{
+	// Set the ISR DUTY_ON
+	PWM_DUTY_ON_CYCLES  = (m_ISR_DUTY_CYCLE*m_ISR_PERIOD)/100;
+
+	// Calculate and Set OFF Cycles
+	PWM_DUTY_OFF_CYCLES = (m_ISR_PERIOD - PWM_DUTY_ON_CYCLES);
+
+}
 //////////////////////////////////////////////////////////////////
 // Timer A0 interrupt service routine
 #pragma vector=TIMER0_A0_VECTOR //TIMERA0_VECTOR
@@ -105,13 +114,15 @@ __interrupt void Timer_A (void)
 		}
 
 
+		TACTL += TACLR;
+
 		//////////////////////////////////////////////////////////
 		// If PWM Pin is 'HIGH'
 		if( (P1OUT & (m_PORT_1_PWM & GPIO_MASK)) | (P2OUT & (m_PORT_2_PWM & GPIO_MASK)) )
 		{
 			//////////////////////////////////////////////////////
 			// Add the 'ON' duty cycles to the count
-			CCR0 += PWM_DUTY_ON_CYCLES;
+			CCR0 = PWM_DUTY_ON_CYCLES;
 		}
 
 		//////////////////////////////////////////////////////////
@@ -120,7 +131,7 @@ __interrupt void Timer_A (void)
 		{
 			//////////////////////////////////////////////////////
 			//Add the 'OFF' duty cycles to the count
-			TA0CCR0 += PWM_DUTY_OFF_CYCLES;
+			CCR0 = PWM_DUTY_OFF_CYCLES;
 		}
 
 	}

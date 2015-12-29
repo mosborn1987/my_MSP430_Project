@@ -13,9 +13,47 @@
 #include <UART.h>
 #include <GPIOs.h>
 
+void PRINT_STRING_EXAMPLE(void)
+{
+	// Initialize UART
+	UART_init();
+
+	// Print string
+	Print_String("Hello Rodrigo!");
+
+}
+
+
+void SEND_CHAR_EXAMPLE(void)
+{
+	// Example 1 - Pass by variable
+	UART_init();
+	unsigned char my_Char = 'A';
+	UARTSendChar(my_Char);
+
+	// Example 2 - Pass by value
+	UARTSendChar('C');
+
+}
+
+void SEND_ARRAY_EXAMPLE(void)
+{
+	UART_init();
+  	while(1)
+  	{
+  		UARTSendArray("Hello World!\n\r", 16);
+
+  		// Time Delay
+  		_LP_time_delay_s(1);
+
+  	}
+
+}
+
 void LED_UART_CONTROL(void)
 {
 	UART_init();
+
 
 	// initialize LEDs
 	// Set up the pin P1_0 and P1_6
@@ -26,8 +64,10 @@ void LED_UART_CONTROL(void)
 	pinMODE(P1_0, OUTPUT);
 	pinMODE(P1_6, OUTPUT);
 
+
 	while(1)
 	{
+//		UART_Test();
 		char LED_Data = UART_get_single_char();
 		switch(LED_Data){
 				case 'R':
@@ -46,7 +86,7 @@ void LED_UART_CONTROL(void)
 
 				default:
 				{
-					//	UARTSendArray("Unknown Command: ", 17);
+						UARTSendArray("\r\nUnknown Command: ", 21);
 					//	UARTSendArray(&data, 1);
 					//	UARTSendArray("\n\r", 2);
 				}

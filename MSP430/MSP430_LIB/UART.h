@@ -10,10 +10,16 @@
 #ifndef MSP430_LIB_UART_H_
 #define MSP430_LIB_UART_H_
 
+// Contains 'sprintf'
+#include <stdio.h>
 
 ////////////////////////////////////////////////////////////////////////
 // Variable declaration
 static volatile char data;
+
+///////////////////////////////////////////////////////////////////
+// Declare buffer size and data type
+unsigned char UART_buffer[100];
 
 ////////////////////////////////////////////////////////////////////////
 // Function Declaration - Each Function prototype is defined later
@@ -196,19 +202,61 @@ void UARTSendChar( unsigned char send_char)
 // Example
 void UART_Test(void)
 {
-	///////////////////////////////////////////////////////////////////
-	// Declare buffer size and data type
-	char buffer[20];
 
 	int Test_Number = 1;
 	///////////////////////////////////////////////////////////////////
 	// Format buffer with string
-	sprintf( buffer, "UART Test #%d\n",Test_Number );
+	sprintf( UART_buffer, "UART Test #%d\n\r",Test_Number );
 
 	// Send formatted buffer to UART
-	UARTSendArray(&buffer, strlen(buffer));
+	UARTSendArray(&UART_buffer, strlen(UART_buffer));
 
 }
+
+void Print_String(const char *my_Char)
+{
+	///////////////////////////////////////////////////////////////////
+	// Format buffer with string
+	sprintf( UART_buffer, my_Char);
+
+	// Send formatted buffer to UART
+	UARTSendArray(&UART_buffer, strlen(UART_buffer));
+
+}
+
+#define bell_sound 7
+
+void System_Bell(void)
+{
+	UARTSendChar(bell_sound);
+}
+
+//////////////////////////////////////////////////////////////////////
+// Example
+void UART_GREATER(void)
+{
+
+	///////////////////////////////////////////////////////////////////
+	// Format buffer with string
+	sprintf( UART_buffer, "GREATER\n\r");
+
+	// Send formatted buffer to UART
+	UARTSendArray(&UART_buffer, strlen(UART_buffer));
+}
+
+//////////////////////////////////////////////////////////////////////
+// Example
+void UART_LESS(void)
+{
+
+	///////////////////////////////////////////////////////////////////
+	// Format buffer with string
+	sprintf( UART_buffer, "LESS\n\r");
+
+	// Send formatted buffer to UART
+	UARTSendArray(&UART_buffer, strlen(UART_buffer));
+}
+
 
 
 #endif /* MSP430_LIB_UART_H_ */
