@@ -28,6 +28,10 @@ void main(void)
 
   	BCSCTL1 = CALBC1_1MHZ;      // Set DCO
   	DCOCTL  = CALDCO_1MHZ;
+  	while(1)
+  	{
+
+  	}
 
 
 }

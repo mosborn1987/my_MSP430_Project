@@ -22,7 +22,7 @@
  * ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include <msp430.h>
+//#include <msp430.h>
 #include "msp430_spi.h"
 #include "nrf_userconfig.h"
 
@@ -598,7 +598,7 @@ void spi_init()
 	P2SEL1 |= BIT0 | BIT1;
 	#endif
 	#if defined(__MSP430FR5739__)
-	
+
 	#endif
 
 	/* USCI_A specific SPI setup */
@@ -688,7 +688,7 @@ void spi_init()
 	P2SEL1 |= BIT4 | BIT5 | BIT6;
 	#endif
 	#if defined(__MSP430FR5739__)
-	
+
 	#endif
 
 	/* USCI_A specific SPI setup */
@@ -769,7 +769,7 @@ void spi_init()
 	P2SEL1 |= BIT2;
 	#endif
 	#if defined(__MSP430FR5739__)
-	
+
 	#endif
 
 	/* USCI_B specific SPI setup */
