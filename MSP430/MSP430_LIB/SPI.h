@@ -43,7 +43,7 @@
 /**
  * Initialize HW interface (SPI) to nRF24l01.
  */
-void spi_init(void);
+void spi_init_mine(void);
 
 /**
  * Drive CS high.
@@ -84,7 +84,7 @@ unsigned char spi_xfer_byte(unsigned char data);
  */
 #define CS      BIT3
 
-void spi_init(void)
+void spi_init_mine(void)
 {
 	/**
 	 * From TIs users manual
